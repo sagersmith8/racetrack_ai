@@ -1,0 +1,114 @@
+/*
+=========================================================
+  Apply Plugins
+=========================================================
+ */
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.2.RELEASE")
+    }
+}
+
+/*
+=========================================================
+Apply plugins
+=========================================================
+*/
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+apply plugin: 'org.springframework.boot'
+
+/*
+=========================================================
+Repo Info
+=========================================================
+*/
+group = 'com.ai'
+description = 'Experiment with Machine Learning techniques'
+
+/*
+=========================================================
+  Create self contained jar
+=========================================================
+*/
+
+def artifactName = 'racetrack_ai'
+
+springBoot {
+    mainClass = "com.ai.Main"
+}
+
+task generatePom << {
+    pom {
+        project {
+            artifactId = artifactName
+            name = artifactName
+        }
+    }.writeTo("$buildDir/tmp/maven/pom.xml")
+}
+
+jar {
+    baseName = artifactName
+    manifest {
+        attributes(
+                "Implementation-Title": baseName,
+                "Implementation-Version": version,
+        )
+    }
+    into("META-INF/maven/$project.group/$baseName") {
+        from "$buildDir/tmp/maven/"
+    }
+}
+
+jar.dependsOn generatePom
+
+/*
+=========================================================
+    Javadocs Generation
+=========================================================
+*/
+task docs(type: Javadoc) {
+    source = sourceSets.main.allJava
+    destinationDir = file("$project.buildDir/javadocs")
+    failOnError = false
+}
+
+task docBundle(type: Tar) {
+    baseName = artifactName
+    version = project.version
+    extension = "tar.gz"
+    classifier = "javadoc"
+    destinationDir = file("$buildDir/")
+    from(project.files("$buildDir/javadocs"))
+}
+docBundle.dependsOn docs
+
+/*
+
+/*
+=========================================================
+   Load Dependencies
+=========================================================
+*/
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile(group: "org.springframework.boot", name: "spring-boot-starter-web") {
+        exclude(module: "spring-boot-starter-tomcat")
+        exclude(group: "org.hibernate")
+    }
+    compile(group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.1')
+    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    compile (group: 'com.github.rschmitt', name: 'dynamic-object', version: '1.6.0')
+    compile(group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3')
+    compile(group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3')
+    testCompile(group: 'junit', name: 'junit', version: '4.12')
+    testCompile(group: 'org.mockito', name: 'mockito-core', version: '1.8.5')
+}
