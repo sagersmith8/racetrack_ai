@@ -1,5 +1,7 @@
 package com.ai;
 
+import java.util.Objects;
+
 public class Action {
     private final int xAcceleration;
     private final int yAcceleration;
@@ -20,5 +22,20 @@ public class Action {
     public boolean isValid() {
 	return (-1 <= xAcceleration && xAcceleration <= 1) &&
 	       (-1 <= yAcceleration && yAcceleration <= 1);
+    }
+
+    @Override
+    public int hashCode() {
+	return Objects.hash(xAcceleration, yAcceleration);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	if (!(o instanceof Action)) {
+	    return false;
+	}
+	Action other = (Action)o;
+	return this.xAcceleration == other.xAcceleration &&
+	       this.yAcceleration == other.yAcceleration;
     }
 }

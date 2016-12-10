@@ -1,5 +1,7 @@
 package com.ai;
 
+import java.util.Objects;
+
 public class State {
     private final Position position;
     private final Velocity velocity;
@@ -15,6 +17,21 @@ public class State {
 
     public Velocity getVelocity() {
 	return velocity;
+    }
+
+    @Override
+    public int hashCode() {
+	return Objects.hash(position, velocity);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	if(!(o instanceof State)) {
+	    return false;
+	}
+	State other = (State)o;
+	return Objects.equals(this.position, other.position) &&
+	       Objects.equals(this.velocity, other.velocity);
     }
 }
 
@@ -34,6 +51,21 @@ class Position {
     public int getY() {
 	return y;
     }
+
+    @Override
+    public int hashCode() {
+	return Objects.hash(x, y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	if(!(o instanceof Position)) {
+	    return false;
+	}
+	Position other = (Position)o;	
+	return this.x == other.x &&
+	       this.y == other.y;
+    }
 }
 
 class Velocity {
@@ -52,5 +84,20 @@ class Velocity {
 
     public int getY() {
 	return y;
+    }
+
+    @Override
+    public int hashCode() {
+	return Objects.hash(x, y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	if (!(o instanceof Velocity)) {
+	    return false;
+	}
+	Velocity other = (Velocity)o;
+	return this.x == other.x &&
+	       this.y == other.y;
     }
 }
