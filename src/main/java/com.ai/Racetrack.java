@@ -18,16 +18,16 @@ public class Racetrack {
 
     private Racetrack(boolean[][] isSafe, Set<Position> startingLine, Set<Position> finishLine) {
         this.isSafe = isSafe;
-	width = isSafe.length;
-	height = isSafe[0].length;
-	
+        width = isSafe.length;
+        height = isSafe[0].length;
+
         this.startingLine = Collections.unmodifiableSet(startingLine);
         this.finishLine = Collections.unmodifiableSet(finishLine);
     }
 
     public static Racetrack fromFile(String filename) throws FileNotFoundException, IOException {
-	return fromStream(ClassLoader.getSystemClassLoader()
-			  .getResourceAsStream(filename));
+        return fromStream(ClassLoader.getSystemClassLoader()
+                          .getResourceAsStream(filename));
     }
 
     public static Racetrack fromStream(InputStream stream) throws IOException {
@@ -58,10 +58,18 @@ public class Racetrack {
     }
 
     public boolean isSafe(Position position) {
-	if (position.getX() < 0 || position.getX() >= width ||
-	    position.getY() < 0 || position.getY() >= height)
-	    return false;
+        if (position.getX() < 0 || position.getX() >= width ||
+            position.getY() < 0 || position.getY() >= height)
+            return false;
         return isSafe[position.getX()][position.getY()];
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public Set<Position> startingLine() {
