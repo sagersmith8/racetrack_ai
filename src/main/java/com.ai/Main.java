@@ -2,9 +2,16 @@ package com.ai;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import org.apache.log4j.Logger;
 
 public class Main {
+    public static final Logger logger = Logger.getLogger(Main.class);
+    
     public static void main(String ... args) {
+	logger.debug("Hi there");
+	logger.info("Info message");
+	logger.warn("Warning message");
+	logger.warn("Warning message");	
     }
 
     /**
