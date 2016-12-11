@@ -3,10 +3,10 @@ package com.ai;
 public abstract class RacetrackLearner {
     protected Racetrack racetrack;
     protected CollisionModel collisionModel;
-    
+
     public RacetrackLearner(Racetrack racetrack, CollisionModel collisionModel) {
-	this.racetrack = racetrack;
-	this.collisionModel = collisionModel;
+        this.racetrack = racetrack;
+        this.collisionModel = collisionModel;
     }
 
     public abstract void next();    

@@ -4,9 +4,9 @@ import java.util.List;
 
 public class MDPActionSimulator implements ActionSimulator {
     private MDP mdp;
-    
+
     public MDPActionSimulator(MDP mdp) {
-	this.mdp = mdp;
+        this.mdp = mdp;
     }
 
     /**
@@ -21,20 +21,20 @@ public class MDPActionSimulator implements ActionSimulator {
      * @return the next state
      */
     public State getNextState(State state, Action action) {
-	List<PotentialState> potentialStates = mdp.getNextStates(state, action);
-	double decisionNum = Math.random();
+        List<PotentialState> potentialStates = mdp.getNextStates(state, action);
+        double decisionNum = Math.random();
 
-	for (PotentialState potentialState : potentialStates) {
-	    decisionNum -= potentialState.getProbability();
-	    if (decisionNum <= 0) {
-		return potentialState.getState();
-	    }
-	}
+        for (PotentialState potentialState : potentialStates) {
+            decisionNum -= potentialState.getProbability();
+            if (decisionNum <= 0) {
+                return potentialState.getState();
+            }
+        }
 
-	//Assume floating-point error, so the random number was
-	//between the sum of the probabilities of the potential
-	//states (which should be one w/o floating point error) and one
-	//This indicates the last state should be picked
-	return potentialStates.get(potentialStates.size() - 1).getState();
+        //Assume floating-point error, so the random number was
+        //between the sum of the probabilities of the potential
+        //states (which should be one w/o floating point error) and one
+        //This indicates the last state should be picked
+        return potentialStates.get(potentialStates.size() - 1).getState();
     }
 }
