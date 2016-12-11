@@ -33,6 +33,11 @@ public class State {
         return Objects.equals(this.position, other.position) &&
                Objects.equals(this.velocity, other.velocity);
     }
+
+    @Override
+    public String toString() {
+        return "[" + position + ", " + velocity + "]";
+    }
 }
 
 class Position {
@@ -65,6 +70,11 @@ class Position {
         Position other = (Position)o;   
         return this.x == other.x &&
                this.y == other.y;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
     }
 }
 
@@ -99,5 +109,10 @@ class Velocity {
         Velocity other = (Velocity)o;
         return this.x == other.x &&
                this.y == other.y;
+    }
+
+    @Override
+    public String toString() {
+        return "<" + x + ", " + y + ">";
     }
 }

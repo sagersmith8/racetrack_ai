@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class Racetrack {
@@ -74,6 +75,16 @@ public class Racetrack {
 
     public Set<Position> startingLine() {
         return startingLine;
+    }
+
+    public Position randomStartingPosition() {
+        Iterator<Position> iter = startingLine.iterator();
+        int randomIndex = (int)(Math.random() * startingLine.size());
+
+        for(; randomIndex != 0; randomIndex--) {
+            iter.next();
+        }
+        return iter.next();
     }
 
     public Set<Position> finishLine() {

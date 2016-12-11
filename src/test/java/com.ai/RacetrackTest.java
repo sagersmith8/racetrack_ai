@@ -14,7 +14,7 @@ public class RacetrackTest {
         }
         return null;
     }
-    
+
     @Test
     public void testCanRead() {
         final Racetrack track = readTrackOrFail("small_test_1.txt");
