@@ -101,6 +101,10 @@ class StopCollisionModel implements CollisionModel {
             return new State(endPosition, velocity);
         }
 
+	if (endPosition == null) {
+	    return null;
+	}
+
         return new State(collisionPosition, new Velocity(0, 0));
     }
 }
@@ -114,6 +118,10 @@ class RestartCollisionModel implements CollisionModel {
         if (endPosition.equals(collisionPosition)) {
             return new State(endPosition, velocity);
         }
+
+	if (endPosition == null) {
+	    return null;
+	}
 
         return new State(racetrack.startingLine().iterator().next(), new Velocity(0, 0));
     }
