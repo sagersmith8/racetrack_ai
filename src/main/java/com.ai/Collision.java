@@ -11,12 +11,12 @@ interface CollisionModel {
 
 class StopCollisionModel implements CollisionModel {
     public State getNextState(Racetrack racetrack, Position position, Velocity velocity) {
-	return null;
+        return null;
     }
 }
 
 class RestartCollisionModel implements CollisionModel {
     public State getNextState(Racetrack racetrack, Position position, Velocity velocity) {
-	return null;
+        return null;
     }
 }
