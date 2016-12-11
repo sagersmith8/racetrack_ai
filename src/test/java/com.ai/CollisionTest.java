@@ -41,7 +41,6 @@ public class CollisionTest {
     public void testEdgeCollision() {
 	Racetrack track = readTrackOrFail("all_safe.txt");
 
-	System.out.println("Edge collision");
 	Assert.assertEquals(new Position(0, 2), Collision.followMove(track, new Position(2, 2), new Velocity(-5, 0)));
 	Assert.assertEquals(new Position(4, 2), Collision.followMove(track, new Position(2, 2), new Velocity(5, 0)));
 	Assert.assertEquals(new Position(2, 0), Collision.followMove(track, new Position(2, 2), new Velocity(0, -5)));
