@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.ai.model.Position;
+
 public class Racetrack {
     private final boolean[][] isSafe;
     private final int width, height;

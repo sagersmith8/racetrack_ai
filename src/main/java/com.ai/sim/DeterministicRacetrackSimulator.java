@@ -1,4 +1,9 @@
-package com.ai;
+package com.ai.sim;
+
+import com.ai.Racetrack;
+import com.ai.model.Action;
+import com.ai.model.State;
+import com.ai.model.Velocity;
 
 public class DeterministicRacetrackSimulator implements ActionSimulator {
     private final Racetrack racetrack;

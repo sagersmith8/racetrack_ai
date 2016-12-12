@@ -1,4 +1,10 @@
-package com.ai;
+package com.ai.sim;
+
+import com.ai.Policy;
+import com.ai.Racetrack;
+import com.ai.model.Position;
+import com.ai.model.State;
+import com.ai.model.Velocity;
 
 public class RaceSimulator {
     private final ActionSimulator actionSimulator;
