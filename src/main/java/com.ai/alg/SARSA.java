@@ -41,7 +41,7 @@ public class SARSA extends RacetrackLearner{
 	 * @return the action to take in the given state
 	 */
 	public Action getAction(State state){
-	    if(Math.random() < 1.0/TIMES_TO_VISIT*timesVisited.getOrDefault(state,0)){//get epsilon
+	    if(Math.random() > timesVisited.getOrDefault(state,0)/TIMES_TO_VISIT){//get epsilon
 		double bestCost = Double.MAX_VALUE;
 		Action argMax = new Action(0,0);//
 		Map<Action, Double> actions = qTable.getOrDefault(state, new HashMap<Action, Double>());
@@ -79,11 +79,11 @@ public class SARSA extends RacetrackLearner{
 	List<Action> actions = new ArrayList<>();
 	List<State> states = new ArrayList<>();
 	//determine random starting location and velocity
-	do{
+	do {
 	    xPos = (int)(Math.random()*racetrack.getWidth());
 	    yPos = (int)(Math.random()*racetrack.getHeight());
 	    curPos = new Position(xPos, yPos);
-	}while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
+	} while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
 	
 	xVel = (int)(Math.random()*12-5);
 	yVel = (int)(Math.random()*12-5);
