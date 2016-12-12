@@ -57,8 +57,9 @@ public class PolicyTester {
         boolean terminated = false;
 
         for (int i = 0; i < numTests; i++) {
-            if (i == EARLY_STOP_TESTS && !terminated)
+            if (i == EARLY_STOP_TESTS && !terminated) {
                 break;
+            }
 
             int runLength = raceSimulator.runPolicy(racetrack.randomStartingPosition(), policy);
             if (!terminated) {
