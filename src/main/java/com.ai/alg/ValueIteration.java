@@ -37,6 +37,11 @@ public class ValueIteration extends RacetrackLearner {
         initializeUtilities();
     }
 
+    @Override
+    public String toString() {
+        return "Value iteration";
+    }
+
     private void initializeUtilities() {
         //set random values for the initial utilities
         for (int x = 0; x < racetrack.getWidth(); x++) {

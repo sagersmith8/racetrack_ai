@@ -9,8 +9,14 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.springframework.boot.SpringApplication;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -223,7 +229,7 @@ public class Main {
                 activeLearners.addAll(collisionEntry.getValue());
             }
         }
-
+        
         while (!activeLearners.isEmpty()) {
             for (Map.Entry<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> raceTrackEntry : learners.entrySet()) {
                 logger.debug(raceTrackEntry.getKey());
@@ -261,17 +267,49 @@ public class Main {
         }
     }
 
+    private static void makeChart(String title, List<Integer> iterationCounts, List<Double> means, List<Double> confidence) throws IOException {
+        DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
+        for (int i = 0; i < iterationCounts.size(); i++) {
+            line_chart_dataset.addValue(means.get(i)-confidence.get(i), " confidence lower", iterationCounts.get(i));
+            line_chart_dataset.addValue(means.get(i)+confidence.get(i), " confidence upper", iterationCounts.get(i));
+            line_chart_dataset.addValue(means.get(i), "mean", iterationCounts.get(i));
+        }
+
+        JFreeChart lineChartObject = ChartFactory.createLineChart(
+                title, "Iterations",
+                "Results",
+                line_chart_dataset, PlotOrientation.VERTICAL,
+                true,true,false);
+
+        int width = 1500; /* Width of the image */
+        int height = 1000; /* Height of the image */
+        File lineChart = new File("results/"+title+".png" );
+        ChartUtilities.saveChartAsPNG(lineChart ,lineChartObject, width ,height);
+    }
+
     private static List<Result> runLearner(RacetrackLearner learner, PolicyTester tester, Integer maxIterations) {
         List<Result> results = new ArrayList<>();
-        logger.debug("Starting "+learner+ " "+tester+ "...");
+        List<Integer> iterations = new ArrayList<>();
+        List<Double> confidence = new ArrayList<>();
+        List<Double> means = new ArrayList<>();
+        logger.info("Starting "+learner+ " "+tester+ "...");
         while (!learner.finished() && learner.getIterationCount() <= maxIterations) {
             logger.debug("Current iteration: "+learner.getIterationCount()+ "...");
             learner.next();
+            iterations.add(learner.getIterationCount());
             Policy policy = learner.getPolicy();
+            Result result = tester.testPolicy(policy);
+            means.add(result.getMean());
+            confidence.add(result.getConfidence());
             results.add(tester.testPolicy(policy));
         }
-        logger.debug("Finished "+learner+ " "+tester+ "...");
-
+        logger.info("Finished "+learner+ " "+tester+ "...");
+        logger.info("Making Graph!");
+        try {
+            makeChart(learner + " on " + tester.getRacetrack() + " using " + tester.collisionModel(), iterations, means, confidence);
+        } catch (IOException ex) {
+            logger.error("Could not save chart", ex);
+        }
         if (learner.finished()) {
             logger.debug(learner + " finished!");
         } else {
