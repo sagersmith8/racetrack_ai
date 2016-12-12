@@ -2,35 +2,24 @@ package com.ai;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
-public class SARSA implements Policy {
+public class SARSA extends RacetrackLearner{
     double learningRate;
-    private static final double DEFAULT_LEARNING_RATE = 0.85;
+    private static final double LEARNING_RATE = 0.85;
+    private static final double GAMMA = 0.2;
     private static final int TIMES_TO_VISIT = 30;
 
     private int iterationCount = 0;
     private Map<State, Map<Action, Double>> qTable = new HashMap<>();
     private Map<State, Integer> timesVisited = new HashMap<>();
     private MDPActionSimulator aSim;
-    private Racetrack racetrack;
-    private CollisionModel collisionModel;
     private Policy policy;
     private int iterationLimit;
 
     public SARSA(Racetrack racetrack, CollisionModel collisionModel){
-	this(racetrack, collisionModel, DEFAULT_LEARNING_RATE);
-    }
-    
-    public SARSA(Racetrack racetrack, CollisionModel collisionModel, double learningRate){
-	// Constrain learningRate to valid values
-	if(learningRate != null){
-	    this.learningRate = Math.max(0, Math.min(learningRate, 1));
-	}else{
-	    this.learningRate = DEFAULT_LEARNING_RATE;
-	}
-
-	this.racetrack = racetrack;
-	this.collisionModel = collisionModel;
+	super(racetrack, collisionModel);
 
 	aSim = new MDPActionSimulator(new RacetrackMDP(racetrack, collisionModel));
 
@@ -39,14 +28,21 @@ public class SARSA implements Policy {
 	iterationLimit = racetrack.getWidth()*racetrack.getHeight()*2;
 
 	//set value of finish state to 0
-	
     }
 
-    public class SARSAPolicy implements Policy{
+    class SARSAPolicy implements Policy{
 	public Action getAction(State state){
 	    if(Math.random() < 1/TIMES_TO_VISIT*timesVisited.getOrDefault(state,0)){//get epsilon
-		for(Action action : qTable.get(state)
-		Collections.max(qTable.getOrDefault(state,null));
+		double bestUtility = Double.MAX_VALUE;
+		Action argMax = new Action(0,0);//
+		Map<Action, Double> actions = qTable.get(state);
+		for(Action action : actions.keySet()){
+		    if(actions.get(action) < bestUtility) {
+			argMax = action;
+			bestUtility = actions.get(action);
+		    }
+		}
+		return argMax;
 	    }else{
 		return getRandomAction();
 	    }
@@ -95,8 +91,8 @@ public class SARSA implements Policy {
 	} while (curState != null);
 
 	for (int i = 0; i < states.size(); i++) {
-	    State curState = states.get(i);
-	    Action curAction = actions.get(i);
+	    State state = states.get(i);
+	    Action action = actions.get(i);
 	    double nextStateActionUtility = 0;
 
 	    if (i < states.size() - 1) {
@@ -105,7 +101,7 @@ public class SARSA implements Policy {
 		nextStateActionUtility = qTable.get(nextState).get(nextAction);
 	    }
 	    
-	    qTable.get(curState).put(curAction, ((1 - LEARNING_RATE) * qTable.get(curState).get(curAction) +
+	    qTable.get(state).put(action, ((1 - LEARNING_RATE) * qTable.get(state).get(action) +
 						 LEARNING_RATE * (1 + GAMMA * nextStateActionUtility)));
 	}
 		
