@@ -1,5 +1,7 @@
-package com.ai;
+package com.ai.alg;
 
+import com.ai.Policy;
+import com.ai.Racetrack;
 import com.ai.sim.CollisionModel;
 
 public abstract class RacetrackLearner {
