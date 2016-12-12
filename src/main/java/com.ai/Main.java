@@ -108,17 +108,28 @@ public class Main {
      */
     private static Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> getRaceTrackLearners(OptionSet options, List<Racetrack> racetracks, List<CollisionModel> collisonModels) {
         Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> learners = new HashMap<>();
-
         if (options.hasArgument("learner")) {
             String learnerName = options.valueOf("learner").toString();
             switch (learnerName) {
                 case "sarsa":
                     logger.debug("Adding Sarsa to tester...");
-                    //TODO add Sarsa
+                    for (Racetrack racetrack : racetracks) {
+                        Map<CollisionModel, List<RacetrackLearner>> collisionMap = new HashMap<>();
+                        learners.put(racetrack, collisionMap);
+                        for (CollisionModel collisionModel: collisonModels) {
+                            collisionMap.put(collisionModel, Arrays.asList(new SARSA(racetrack, collisionModel)));
+                        }
+                    }
                     break;
                 case "value-iteration":
                     logger.debug("Adding Value iteration to tester...");
-                    //TODO add value iteration
+                    for (Racetrack racetrack : racetracks) {
+                        Map<CollisionModel, List<RacetrackLearner>> collisionMap = new HashMap<>();
+                        learners.put(racetrack, collisionMap);
+                        for (CollisionModel collisionModel: collisonModels) {
+                            collisionMap.put(collisionModel, Arrays.asList(new ValueIteration(racetrack, collisionModel)));
+                        }
+                    }
                     break;
                 default:
                     logger.error("Value not recognized: " + learnerName + ". Expected <sarsa> or <value-iteration>...");
@@ -126,8 +137,13 @@ public class Main {
                     new RuntimeException("Learner name not recognized");
             }
         } else {
-            //TODO add sarsa
-            //TODO add value iteration
+            for (Racetrack racetrack : racetracks) {
+                Map<CollisionModel, List<RacetrackLearner>> collisionMap = new HashMap<>();
+                learners.put(racetrack, collisionMap);
+                for (CollisionModel collisionModel: collisonModels) {
+                    collisionMap.put(collisionModel, Arrays.asList(new SARSA(racetrack, collisionModel), new ValueIteration(racetrack, collisionModel)));
+                }
+            }
         }
 
         return learners;
