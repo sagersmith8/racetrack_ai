@@ -167,16 +167,9 @@ public class Main {
         List<Racetrack> racetracks = new ArrayList<>();
 
         Map<String, Racetrack> racetrackRegistry = new HashMap<>();
-        logger.debug("Adding only the l_track to the registry...");
         racetrackRegistry.put("l_track", Racetrack.fromFile("l_track.txt").withName("l_track"));
-
-        logger.debug("Adding only the r_track to the registry...");
         racetrackRegistry.put("r_track", Racetrack.fromFile("r_track.txt").withName("r_track"));
-
-        logger.debug("Adding only the o_track to the registry...");
         racetrackRegistry.put("o_track", Racetrack.fromFile("o_track.txt").withName("o_track"));
-
-        logger.debug("Adding only the small_l_track to the registry...");
         racetrackRegistry.put("small_l_track", Racetrack.fromFile("small_l_track.txt").withName("small_l_track"));
 
         if (options.hasArgument("racetrack")) {
