@@ -164,9 +164,16 @@ public class Main {
         List<Racetrack> racetracks = new ArrayList<>();
 
         Map<String, Racetrack> racetrackRegistry = new HashMap<>();
+        logger.debug("Adding only the l_track to the registry...");
         racetrackRegistry.put("l_track", Racetrack.fromFile("l_track.txt"));
+
+        logger.debug("Adding only the r_track to the registry...");
         racetrackRegistry.put("r_track", Racetrack.fromFile("r_track.txt"));
+
+        logger.debug("Adding only the o_track to the registry...");
         racetrackRegistry.put("o_track", Racetrack.fromFile("o_track.txt"));
+
+        logger.debug("Adding only the small_l_track to the registry...");
         racetrackRegistry.put("small_l_track", Racetrack.fromFile("small_l_track.txt"));
 
         if (options.hasArgument("racetrack")) {
@@ -178,7 +185,7 @@ public class Main {
                 racetracks.add(racetrackRegistry.get(options.valueOf("racetrack").toString()));
             }
         } else {
-            racetracks.add(racetrackRegistry.get("small_l_track.txt"));
+            racetracks.add(racetrackRegistry.get("small_l_track"));
             logger.debug("Adding only the small_l_track...");
         }
 
@@ -216,15 +223,21 @@ public class Main {
         }
     }
 
+    private static Double[][] runLearner(RacetrackLearner learner, PolicyTester tester) {
+        return null;
+    }
+
     private static void multiThreadedRun(Map<Racetrack, RacetrackLearner> learners, Map<Racetrack, List<PolicyTester>> policyTesters, Integer maxIteration) throws Exception{
         ExecutorService executor = Executors.newWorkStealingPool();
-        List<Callable<String>> callables = Arrays.asList(
-                () -> "task1",
-                () -> "task2",
-                () -> "task3");
+        List<Callable<Double[][]>> callables = new ArrayList<>();
+        for (Map.Entry<Racetrack, RacetrackLearner> entry : learners.entrySet()) {
+            for (PolicyTester tester : policyTesters.get(entry.getKey())) {
+                callables.add(() -> runLearner(entry.getValue(), tester));
+            }
+        }
 
-        executor.invokeAll(callables)
-                .stream()
+        logger.debug("About to create futures...");
+        executor.invokeAll(callables).stream()
                 .map(future -> {
                     try {
                         return future.get();
@@ -232,7 +245,7 @@ public class Main {
                     catch (Exception e) {
                         throw new IllegalStateException(e);
                     }
-                }).forEach(System.out::println);
+                }).forEach(logger::debug);
     }
 
     /**
