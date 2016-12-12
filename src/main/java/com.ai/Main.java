@@ -2,6 +2,7 @@ package com.ai;
 
 import com.ai.alg.RacetrackLearner;
 import com.ai.alg.SARSA;
+import com.ai.alg.ValueIteration;
 import com.ai.sim.Collision;
 import com.ai.sim.CollisionModel;
 import joptsimple.OptionParser;
@@ -37,7 +38,7 @@ public class Main {
      * @param options Options to check
      */
     private static void handleSampleRun(OptionSet options) {
-        if (options.hasArgument("sample-run")) {
+        if (options.has("sample-run")) {
             logger.setLevel(Level.DEBUG);
             logger.debug("Beginning Sample Run...");
         } else {
@@ -166,7 +167,7 @@ public class Main {
         Map<Racetrack, Map<CollisionModel, PolicyTester>> policyTesters = getPolicyTesters(options, racetracks, collisionModels);
 
 
-        if (options.hasArgument("no-thread")) {
+        if (options.has("no-thread")) {
             nonThreadedRun(learners, policyTesters, (Integer) options.valueOf("max-iteration"));
         } else {
             multiThreadedRun(learners, policyTesters, (Integer) options.valueOf("max-iteration"));
@@ -224,12 +225,16 @@ public class Main {
 
         while (!activeLearners.isEmpty()) {
             for (Map.Entry<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> raceTrackEntry : learners.entrySet()) {
+                logger.debug(raceTrackEntry.getKey());
                 for (Map.Entry<CollisionModel, List<RacetrackLearner>> collisionEntry : raceTrackEntry.getValue().entrySet()) {
+                    logger.debug(collisionEntry.getKey());
                     for (RacetrackLearner learner : collisionEntry.getValue()) {
+                        logger.debug(learner);
                         if (!activeLearners.contains(learner)) {
                             continue;
                         }
                         learner.next();
+                        logger.debug("Finished next...");
                         Policy policy = learner.getPolicy();
                         PolicyTester policyTester = policyTesters.get(raceTrackEntry.getKey()).get(collisionEntry.getKey());
                         Result result = policyTester.testPolicy(policy);
