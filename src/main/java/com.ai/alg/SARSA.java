@@ -41,7 +41,7 @@ public class SARSA extends RacetrackLearner{
 	 * @return the action to take in the given state
 	 */
 	public Action getAction(State state){
-	    if(Math.random() > (double)timesVisited.getOrDefault(state,0)/TIMES_TO_VISIT){//get epsilon
+	    if(Math.random() < (double)timesVisited.getOrDefault(state,0)/TIMES_TO_VISIT){//get epsilon
 		double bestCost = Double.MAX_VALUE;
 		Action argMax = new Action(0,0);//
 		Map<Action, Double> actions = qTable.getOrDefault(state, new HashMap<Action, Double>());
