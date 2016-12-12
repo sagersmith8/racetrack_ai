@@ -1,6 +1,6 @@
 logging:
   level:
-    ROOT: 'warn'
+    ROOT: 'debug'
     jndi: 'warn'
     org.eclipse.jetty: 'warn'
     org.jose4j: 'warn'
