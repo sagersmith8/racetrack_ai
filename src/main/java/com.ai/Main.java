@@ -1,6 +1,7 @@
 package com.ai;
 
 import com.ai.alg.RacetrackLearner;
+import com.ai.alg.SARSA;
 import com.ai.sim.Collision;
 import com.ai.sim.CollisionModel;
 import joptsimple.OptionParser;
@@ -13,8 +14,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -212,10 +215,20 @@ public class Main {
      */
     private static void nonThreadedRun(Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> learners, Map<Racetrack, Map<CollisionModel, PolicyTester>> policyTesters, Integer maxIteration) {
         logger.debug("Starting a non threaded run...");
-        while (!learners.isEmpty()) {
+        Set<RacetrackLearner> activeLearners = new HashSet<>();
+        for (Map.Entry<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> raceTrackEntry : learners.entrySet()) {
+            for (Map.Entry<CollisionModel, List<RacetrackLearner>> collisionEntry : raceTrackEntry.getValue().entrySet()) {
+                activeLearners.addAll(collisionEntry.getValue());
+            }
+        }
+
+        while (!activeLearners.isEmpty()) {
             for (Map.Entry<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> raceTrackEntry : learners.entrySet()) {
                 for (Map.Entry<CollisionModel, List<RacetrackLearner>> collisionEntry : raceTrackEntry.getValue().entrySet()) {
                     for (RacetrackLearner learner : collisionEntry.getValue()) {
+                        if (!activeLearners.contains(learner)) {
+                            continue;
+                        }
                         learner.next();
                         Policy policy = learner.getPolicy();
                         PolicyTester policyTester = policyTesters.get(raceTrackEntry.getKey()).get(collisionEntry.getKey());
@@ -231,10 +244,10 @@ public class Main {
 
                         if (learner.getIterationCount() >= maxIteration) {
                             logger.error("Max iteration count exceeded for: " + learner + "removing policy testers...");
-                            //TODO remove unused racetrack
+                            activeLearners.remove(learner);
                         } else if (learner.finished()) {
                             logger.info(learner + " finished! Removing policy testers...");
-                            //TODO remove unused racetrack
+                            activeLearners.remove(learner);
                         }
                     }
                 }
