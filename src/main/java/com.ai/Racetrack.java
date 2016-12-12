@@ -12,6 +12,7 @@ import java.util.Set;
 public class Racetrack {
     private final boolean[][] isSafe;
     private final int width, height;
+    private static String name = "No name specified";
     
     private final Set<Position> startingLine;
     private final Set<Position> finishLine;
@@ -26,6 +27,7 @@ public class Racetrack {
     }
 
     public static Racetrack fromFile(String filename) throws IOException {
+        name = filename.replace("\\..*", "");
         return fromStream(Thread.currentThread().getContextClassLoader()
                           .getResourceAsStream(filename));
     }
@@ -55,6 +57,11 @@ public class Racetrack {
         }
 
         return new Racetrack(isSafe, startingLine, finishLine);
+    }
+
+    @Override
+    public String toString() {
+        return "Racetrack("+name+")";
     }
 
     public boolean isSafe(Position position) {

@@ -88,7 +88,7 @@ public class Collision {
 }
 
 interface CollisionModel {
-    public State getNextState(Racetrack racetrack, Position position, Velocity velocity);
+    State getNextState(Racetrack racetrack, Position position, Velocity velocity);
 }
 
 class StopCollisionModel implements CollisionModel {
@@ -101,11 +101,16 @@ class StopCollisionModel implements CollisionModel {
             return new State(endPosition, velocity);
         }
 
-	if (endPosition == null) {
-	    return null;
-	}
+        if (endPosition == null) {
+            return null;
+        }
 
         return new State(collisionPosition, new Velocity(0, 0));
+    }
+
+    @Override
+    public String toString() {
+        return "CollisionModel(stop)";
     }
 }
 
@@ -119,10 +124,15 @@ class RestartCollisionModel implements CollisionModel {
             return new State(endPosition, velocity);
         }
 
-	if (endPosition == null) {
-	    return null;
-	}
+        if (endPosition == null) {
+            return null;
+        }
 
         return new State(racetrack.startingLine().iterator().next(), new Velocity(0, 0));
+    }
+
+    @Override
+    public String toString() {
+        return "CollisionModel(start)";
     }
 }
