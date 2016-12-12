@@ -18,4 +18,9 @@ public class PotentialState {
     public double getProbability() {
         return probability;
     }
+
+    @Override
+    public String toString() {
+        return state+"@"+probability;
+    }
 }

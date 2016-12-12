@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class);
@@ -308,7 +309,7 @@ public class Main {
                     catch (Exception e) {
                         throw new IllegalStateException(e);
                     }
-                }).forEach(logger::debug);
+                }).forEach((results -> logger.info(results.stream().map((result -> result.getMean())).collect(Collectors.toList()))));
     }
 
     /**

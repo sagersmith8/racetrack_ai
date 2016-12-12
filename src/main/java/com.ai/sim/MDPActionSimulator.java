@@ -1,9 +1,9 @@
 package com.ai.sim;
 
-import java.util.List;
-
 import com.ai.model.Action;
 import com.ai.model.State;
+
+import java.util.List;
 
 public class MDPActionSimulator implements ActionSimulator {
     private MDP mdp;
@@ -29,7 +29,7 @@ public class MDPActionSimulator implements ActionSimulator {
 
         for (PotentialState potentialState : potentialStates) {
             decisionNum -= potentialState.getProbability();
-            if (decisionNum <= 0) {
+            if (decisionNum <= 0.0) {
                 return potentialState.getState();
             }
         }
