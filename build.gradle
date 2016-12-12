@@ -42,6 +42,18 @@ springBoot {
     mainClass = "com.ai.Main"
 }
 
+bootRun {
+/*
+ * Support testing directly via gradle.
+ *
+ * Example:
+ *  $ gradle bootRun -Pargs="-d mem -t gui"
+ */
+    if (project.hasProperty('args')) {
+        args project.args.split('\\s+')
+    }
+}
+
 task generatePom << {
     pom {
         project {
