@@ -9,8 +9,18 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.springframework.boot.SpringApplication;
 
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -261,17 +271,103 @@ public class Main {
         }
     }
 
+    /**
+     * Creates a graph from the given parameters
+     *
+     * @param title of the graph
+     * @param iterationCounts the x-axis
+     * @param means the y-axis
+     * @param confidence the confidence interval
+     * @throws IOException cannot save graph
+     */
+    private static void makeChart(String title, List<Integer> iterationCounts, List<Double> means, List<Double> confidence, int iterationLimit) throws IOException {
+        DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
+        DefaultCategoryDataset line_chart_dataset2 = new DefaultCategoryDataset();
+        for (int i = 0; i < iterationCounts.size(); i++) {
+            line_chart_dataset.addValue(means.get(i)-confidence.get(i), " confidence lower", iterationCounts.get(i));
+            line_chart_dataset.addValue(means.get(i)+confidence.get(i), " confidence upper", iterationCounts.get(i));
+            if (iterationCounts.get(i) >= iterationLimit) {
+                line_chart_dataset2.addValue(means.get(i)-confidence.get(i), " confidence lower", iterationCounts.get(i));
+                line_chart_dataset2.addValue(means.get(i)+confidence.get(i), " confidence upper", iterationCounts.get(i));
+            }
+        }
+
+        JFreeChart fullChart = ChartFactory.createLineChart(
+                title, "Iterations",
+                "Results",
+                line_chart_dataset, PlotOrientation.VERTICAL,
+                true,true,false);
+        CategoryPlot categoryPlot = fullChart.getCategoryPlot();
+        categoryPlot.setBackgroundPaint(Color.white);
+        categoryPlot.setDomainGridlinePaint(Color.lightGray);
+        categoryPlot.setRangeGridlinePaint(Color.lightGray);
+        categoryPlot.setDomainGridlinesVisible(true);
+        categoryPlot.getRenderer().setSeriesPaint(0, Color.black);
+        categoryPlot.getRenderer().setSeriesPaint(1, Color.black);
+        CategoryAxis domainAxis = categoryPlot.getDomainAxis();
+        domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
+
+        JFreeChart afterIterationCount = ChartFactory.createLineChart(
+                title+" after Iteration limit", "Iterations",
+                "Results",
+                line_chart_dataset2, PlotOrientation.VERTICAL,
+                true,true,false);
+        CategoryPlot categoryPlot2 = afterIterationCount.getCategoryPlot();
+        categoryPlot2.setBackgroundPaint(Color.white);
+        categoryPlot2.setDomainGridlinePaint(Color.lightGray);
+        categoryPlot2.setRangeGridlinePaint(Color.lightGray);
+        categoryPlot2.setDomainGridlinesVisible(true);
+        categoryPlot2.getRenderer().setSeriesPaint(0, Color.black);
+        categoryPlot2.getRenderer().setSeriesPaint(1, Color.black);
+        CategoryAxis domainAxis2 = categoryPlot2.getDomainAxis();
+        domainAxis2.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
+
+
+
+        int width = 800; /* Width of the image */
+        int height = 600; /* Height of the image */
+        File fullLineChart = new File("results/"+title+".png" );
+        File afterIterationChart = new File("results/"+title+" after iteration limit.png" );
+        ChartUtilities.saveChartAsPNG(fullLineChart ,fullChart, width ,height);
+        ChartUtilities.saveChartAsPNG(afterIterationChart ,afterIterationCount, width ,height);
+    }
+
+    /**
+     * Runs the given learner with the policy tester
+     *
+     * @param learner to test
+     * @param tester to test against
+     * @param maxIterations to blow up at
+     * @return A list of results
+     */
     private static List<Result> runLearner(RacetrackLearner learner, PolicyTester tester, Integer maxIterations) {
         List<Result> results = new ArrayList<>();
-        logger.debug("Starting "+learner+ " "+tester+ "...");
+        List<Integer> iterations = new ArrayList<>();
+        List<Double> confidence = new ArrayList<>();
+        List<Double> means = new ArrayList<>();
+        Integer iterationLimit = null;
+        logger.info("Starting "+learner+ " "+tester+ "...");
         while (!learner.finished() && learner.getIterationCount() <= maxIterations) {
             logger.debug("Current iteration: "+learner.getIterationCount()+ "...");
             learner.next();
+
             Policy policy = learner.getPolicy();
+            Result result = tester.testPolicy(policy);
+            if (!tester.atIterationLimit((int)result.getMean()*2) && iterationLimit == null) {
+                iterationLimit = learner.getIterationCount();
+            }
+            means.add(result.getMean());
+            iterations.add(learner.getIterationCount());
+            confidence.add(result.getConfidence());
             results.add(tester.testPolicy(policy));
         }
-        logger.debug("Finished "+learner+ " "+tester+ "...");
-
+        logger.info("Finished "+learner+ " "+tester+ "...");
+        logger.info("Making Graph!");
+        try {
+            makeChart(learner + " on " + tester.getRacetrack() + " using " + tester.collisionModel(), iterations, means, confidence, iterationLimit);
+        } catch (IOException ex) {
+            logger.error("Could not save chart", ex);
+        }
         if (learner.finished()) {
             logger.debug(learner + " finished!");
         } else {
