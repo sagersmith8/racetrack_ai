@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -52,18 +51,18 @@ public class Main {
      * @param collisionModels collision model to test with
      * @return the list of needed policy testers
      */
-    private static Map<Racetrack, List<PolicyTester>> getPolicyTesters(OptionSet options, List<Racetrack> racetracks, List<CollisionModel> collisionModels) {
-        Map<Racetrack, List<PolicyTester>> policyTesters = new HashMap<>();
+    private static Map<Racetrack, Map<CollisionModel, PolicyTester>> getPolicyTesters(OptionSet options, List<Racetrack> racetracks, List<CollisionModel> collisionModels) {
+        Map<Racetrack, Map<CollisionModel, PolicyTester>> policyTesters = new HashMap<>();
 
         for(Racetrack raceTrack : racetracks) {
             if (!policyTesters.containsKey(raceTrack)) {
-                policyTesters.put(raceTrack, new ArrayList<>());
+                policyTesters.put(raceTrack, new HashMap<>());
             }
 
             for (CollisionModel collisionModel: collisionModels) {
                 logger.debug("Adding policy tester for "+ raceTrack + " and "+ collisionModel);
-                List<PolicyTester> policyTesterList = policyTesters.get(raceTrack);
-                policyTesterList.add(new PolicyTester(raceTrack, collisionModel, (Integer) options.valueOf("num-tests")));
+                Map<CollisionModel, PolicyTester> policyTesterList = policyTesters.get(raceTrack);
+                policyTesterList.put(collisionModel, new PolicyTester(raceTrack, collisionModel, (Integer) options.valueOf("num-tests")));
             }
         }
 
@@ -107,8 +106,8 @@ public class Main {
      *
      * @return the needed racetrack learners for testing
      */
-    private static Map<Racetrack, RacetrackLearner> getRaceTrackLearners(OptionSet options, List<Racetrack> racetracks) {
-        Map<Racetrack, RacetrackLearner> learners = new HashMap<>();
+    private static Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> getRaceTrackLearners(OptionSet options, List<Racetrack> racetracks, List<CollisionModel> collisonModels) {
+        Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> learners = new HashMap<>();
 
         if (options.hasArgument("learner")) {
             String learnerName = options.valueOf("learner").toString();
@@ -143,9 +142,9 @@ public class Main {
     private static void run(OptionSet options) throws Exception {
         handleSampleRun(options);
         List<Racetrack> racetracks = getRaceTracks(options);
-        Map<Racetrack, RacetrackLearner> learners = getRaceTrackLearners(options, racetracks);
         List<CollisionModel> collisionModels = getCollisionModels(options);
-        Map<Racetrack, List<PolicyTester>> policyTesters = getPolicyTesters(options, racetracks, collisionModels);
+        Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> learners = getRaceTrackLearners(options, racetracks, collisionModels);
+        Map<Racetrack, Map<CollisionModel, PolicyTester>> policyTesters = getPolicyTesters(options, racetracks, collisionModels);
 
 
         if (options.hasArgument("no-thread")) {
@@ -195,31 +194,32 @@ public class Main {
      * @param policyTesters to test against
      * @param maxIteration to blow up after
      */
-    private static void nonThreadedRun(Map<Racetrack, RacetrackLearner> learners, Map<Racetrack, List<PolicyTester>> policyTesters, Integer maxIteration) {
+    private static void nonThreadedRun(Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> learners, Map<Racetrack, Map<CollisionModel, PolicyTester>> policyTesters, Integer maxIteration) {
         logger.debug("Starting a non threaded run...");
         while (!learners.isEmpty()) {
-            for (Map.Entry<Racetrack, RacetrackLearner> entry : learners.entrySet()) {
-                entry.getValue().next();
-                Policy policy = entry.getValue().getPolicy();
-                Iterator<PolicyTester> policyTesterIterator = policyTesters.get(entry.getKey()).iterator();
-                while (policyTesterIterator.hasNext()) {
-                    PolicyTester policyTester = policyTesterIterator.next();
-                    Result result = policyTester.testPolicy(policy);
-                    logger.debug(
-                            "Result: "+result.getMean() +
-                                    " with confidence of: " + result.getConfidence()+
-                                    " variance: " + result.getVariance() +
-                                    " for Learner :" + entry.getValue() +
-                                    " on iteration: "+entry.getValue().getIterationCount() +
-                                    " using the policy: " + policyTester.collisionModel()
-                    );
+            for (Map.Entry<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> raceTrackEntry : learners.entrySet()) {
+                for (Map.Entry<CollisionModel, List<RacetrackLearner>> collisionEntry : raceTrackEntry.getValue().entrySet()) {
+                    for (RacetrackLearner learner : collisionEntry.getValue()) {
+                        learner.next();
+                        Policy policy = learner.getPolicy();
+                        PolicyTester policyTester = policyTesters.get(raceTrackEntry.getKey()).get(collisionEntry.getKey());
+                        Result result = policyTester.testPolicy(policy);
+                        logger.debug(
+                                "Result: " + result.getMean() +
+                                        " with confidence of: " + result.getConfidence() +
+                                        " variance: " + result.getVariance() +
+                                        " for Learner :" + learner +
+                                        " on iteration: " + learner.getIterationCount() +
+                                        " using the policy: " + policyTester.collisionModel()
+                        );
 
-                    if (entry.getValue().getIterationCount() >= maxIteration) {
-                        logger.error("Max iteration count exceeded for: " +entry.getValue() + "removing policy testers...");
-                        policyTesterIterator.remove();
-                    } else if (entry.getValue().finished()) {
-                        logger.info(entry.getValue() + " finished! Removing policy testers...");
-                        policyTesterIterator.remove();
+                        if (learner.getIterationCount() >= maxIteration) {
+                            logger.error("Max iteration count exceeded for: " + learner + "removing policy testers...");
+                            //TODO remove unused racetrack
+                        } else if (learner.finished()) {
+                            logger.info(learner + " finished! Removing policy testers...");
+                            //TODO remove unused racetrack
+                        }
                     }
                 }
             }
@@ -251,12 +251,14 @@ public class Main {
      *
      * @throws Exception thrown by the thread pool
      */
-    private static void multiThreadedRun(Map<Racetrack, RacetrackLearner> learners, Map<Racetrack, List<PolicyTester>> policyTesters, Integer maxIteration) throws Exception{
+    private static void multiThreadedRun(Map<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> learners, Map<Racetrack, Map<CollisionModel, PolicyTester>> policyTesters, Integer maxIteration) throws Exception{
         ExecutorService executor = Executors.newWorkStealingPool();
         List<Callable<List<Result>>> callables = new ArrayList<>();
-        for (Map.Entry<Racetrack, RacetrackLearner> entry : learners.entrySet()) {
-            for (PolicyTester tester : policyTesters.get(entry.getKey())) {
-                callables.add(() -> runLearner(entry.getValue(), tester, maxIteration));
+        for (Map.Entry<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> entry : learners.entrySet()) {
+            for (Map.Entry<CollisionModel, List<RacetrackLearner>> collisionEntry : entry.getValue().entrySet()) {
+                for (RacetrackLearner learner : collisionEntry.getValue()) {
+                    callables.add(() -> runLearner(learner, policyTesters.get(entry.getKey()).get(collisionEntry.getKey()), maxIteration));
+                }
             }
         }
 
