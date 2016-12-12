@@ -37,16 +37,16 @@ public class PolicyTester {
 
     public Result testPolicy(Policy policy, int numTests) {
         List<Integer> runData = new ArrayList<>();
-	boolean terminated = false;
+        boolean terminated = false;
 
         for (int i = 0; i < numTests; i++) {
-	    if (i == EARLY_STOP_TESTS && !terminated)
-		break;
+            if (i == EARLY_STOP_TESTS && !terminated)
+                break;
 
-	    int runLength = raceSimulator.runPolicy(racetrack.randomStartingPosition(), policy);
-	    if (!terminated) {
-		terminated = !raceSimulator.atIterationLimit(runLength);
-	    }
+            int runLength = raceSimulator.runPolicy(racetrack.randomStartingPosition(), policy);
+            if (!terminated) {
+                terminated = !raceSimulator.atIterationLimit(runLength);
+            }
             runData.add(runLength);
         }
         return new Result(runData);
