@@ -9,6 +9,7 @@ import com.ai.model.Velocity;
 import com.ai.sim.CollisionModel;
 import com.ai.sim.MDP;
 import com.ai.sim.PotentialState;
+import com.ai.sim.RaceSimulator;
 import com.ai.sim.RacetrackMDP;
 import org.apache.log4j.Logger;
 
@@ -118,6 +119,18 @@ public class ValueIteration extends RacetrackLearner {
         }
         utility = nextUtility;
         finished = maxDelta < EPSILON * (1 - GAMMA) / GAMMA;
+
+	printSamplePolicy();
+    }
+
+    private void printSamplePolicy() {
+	RaceSimulator raceSimulator = new RaceSimulator(racetrack, collisionModel);
+	Position startingPosition = racetrack.randomStartingPosition();
+
+	if (logger.isDebugEnabled()) {
+	    logger.debug("Policy Map at Iteration "+getIterationCount());
+	    logger.debug(raceSimulator.printPolicyMap(raceSimulator.policyMap(startingPosition, getPolicy())));
+	}
     }
 
     /**
