@@ -230,9 +230,24 @@ public class Main {
             Policy policy = learner.getPolicy();
             results.add(tester.testPolicy(policy, maxIterations));
         }
+
+        if (learner.finished()) {
+            logger.debug(learner + " finished!");
+        } else {
+            logger.debug(learner + "did not terminate");
+        }
         return results;
     }
 
+    /**
+     * Runs a multi-threaded run of the racetrack runner
+     *
+     * @param learners to test
+     * @param policyTesters to test with
+     * @param maxIteration finish if the max iteration count is run
+     *
+     * @throws Exception thrown by the thread pool
+     */
     private static void multiThreadedRun(Map<Racetrack, RacetrackLearner> learners, Map<Racetrack, List<PolicyTester>> policyTesters, Integer maxIteration) throws Exception{
         ExecutorService executor = Executors.newWorkStealingPool();
         List<Callable<List<Result>>> callables = new ArrayList<>();
