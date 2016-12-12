@@ -134,6 +134,6 @@ class RestartCollisionModel implements CollisionModel {
 
     @Override
     public String toString() {
-        return "CollisionModel(start)";
+        return "CollisionModel(restart)";
     }
 }
