@@ -9,12 +9,16 @@ import com.ai.model.*;
 import com.ai.sim.*;
 import com.ai.*;
 
+import org.apache.log4j.Logger;
+
 
 public class SARSA extends RacetrackLearner{
     double learningRate;
     private static final double LEARNING_RATE = 0.85;
     private static final double GAMMA = 0.2;
     private static final int TIMES_TO_VISIT = 30;
+
+    private static final Logger logger = Logger.getLogger(Main.class);
 
     private int iterationCount = 0;
     private Map<State, Map<Action, Double>> qTable = new HashMap<>();
@@ -83,6 +87,8 @@ public class SARSA extends RacetrackLearner{
 	    xPos = (int)(Math.random()*racetrack.getWidth());
 	    yPos = (int)(Math.random()*racetrack.getHeight());
 	    curPos = new Position(xPos, yPos);
+
+	    logger.debug("SARSA finding starting position: " + xPos + "," + yPos);
 	} while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
 	
 	xVel = (int)(Math.random()*12-5);
@@ -103,6 +109,10 @@ public class SARSA extends RacetrackLearner{
 
 		states.add(curState);
 		curState = aSim.getNextState(curState, curAction);
+	    }
+
+	    if(curState != null){
+		logger.debug("SARSA reached iteration limit, trying again...");
 	    }
 	} while (curState != null);
 
