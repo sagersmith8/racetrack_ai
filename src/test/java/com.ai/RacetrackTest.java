@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.util.Set;
 
+import com.ai.model.Position;
+
 public class RacetrackTest {
     public Racetrack readTrackOrFail(String file) {
         try {

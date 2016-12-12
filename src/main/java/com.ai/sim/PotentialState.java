@@ -1,4 +1,6 @@
-package com.ai;
+package com.ai.sim;
+
+import com.ai.model.State;
 
 public class PotentialState {
     private final State state;

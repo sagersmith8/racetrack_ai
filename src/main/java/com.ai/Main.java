@@ -10,9 +10,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 
-@Configuration
-@SpringBootApplication
-@ComponentScan
 public class Main {
     public static final Logger logger = Logger.getLogger(Main.class);
 

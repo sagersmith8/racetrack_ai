@@ -1,6 +1,9 @@
-package com.ai;
+package com.ai.sim;
 
 import java.util.List;
+
+import com.ai.model.Action;
+import com.ai.model.State;
 
 public class MDPActionSimulator implements ActionSimulator {
     private MDP mdp;

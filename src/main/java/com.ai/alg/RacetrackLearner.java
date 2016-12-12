@@ -1,5 +1,7 @@
 package com.ai;
 
+import com.ai.sim.CollisionModel;
+
 public abstract class RacetrackLearner {
     protected Racetrack racetrack;
     protected CollisionModel collisionModel;
