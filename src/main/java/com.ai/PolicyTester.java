@@ -20,6 +20,10 @@ public class PolicyTester {
         this(racetrack, collisionModel, DEFAULT_NUM_TESTS);
     }
 
+    public boolean atIterationLimit(int iterationCount) {
+        return raceSimulator.atIterationLimit(iterationCount);
+    }
+
     @Override
     public String toString() {
         return "Policy Tester("+racetrack+" , "+collisionModel+")";
