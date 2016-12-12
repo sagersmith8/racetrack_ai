@@ -192,6 +192,13 @@ public class Main {
         return racetracks;
     }
 
+    /**
+     * Runs a non threaded run
+     *
+     * @param learners to test
+     * @param policyTesters to test against
+     * @param maxIteration to blow up after
+     */
     private static void nonThreadedRun(Map<Racetrack, RacetrackLearner> learners, Map<Racetrack, List<PolicyTester>> policyTesters, Integer maxIteration) {
         logger.debug("Starting a non threaded run...");
         while (!learners.isEmpty()) {
