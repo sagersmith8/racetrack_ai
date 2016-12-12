@@ -88,7 +88,7 @@ public class Racetrack {
 
     @Override
     public String toString() {
-        return "Racetrack("+name+")";
+        return name;
     }
 
     /**

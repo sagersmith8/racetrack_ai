@@ -163,7 +163,7 @@ class StopCollisionModel implements CollisionModel {
 
     @Override
     public String toString() {
-        return "CollisionModel(stop)";
+        return "stop model";
     }
 }
 
@@ -189,6 +189,6 @@ class RestartCollisionModel implements CollisionModel {
 
     @Override
     public String toString() {
-        return "CollisionModel(restart)";
+        return "restart model";
     }
 }
