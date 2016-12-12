@@ -229,7 +229,7 @@ public class Main {
                 activeLearners.addAll(collisionEntry.getValue());
             }
         }
-        
+
         while (!activeLearners.isEmpty()) {
             for (Map.Entry<Racetrack, Map<CollisionModel, List<RacetrackLearner>>> raceTrackEntry : learners.entrySet()) {
                 logger.debug(raceTrackEntry.getKey());
@@ -362,7 +362,7 @@ public class Main {
         parser.accepts("learner").withOptionalArg().ofType(String.class);
         parser.accepts("max-iteration").withRequiredArg().ofType(Integer.class).defaultsTo(Integer.MAX_VALUE);
         parser.accepts("no-thread");
-        parser.accepts("num-tests").withRequiredArg().ofType(Integer.class).defaultsTo(20);
+        parser.accepts("num-tests").withRequiredArg().ofType(Integer.class).defaultsTo(1000);
         parser.accepts("result-loc").withRequiredArg().ofType(String.class).defaultsTo("/results");
         parser.accepts("sample-loc").withRequiredArg().ofType(String.class).defaultsTo("/sample_runs");
         parser.accepts("sample-run");
