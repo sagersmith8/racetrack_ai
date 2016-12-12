@@ -1,9 +1,14 @@
-package com.ai;
+package com.ai.alg;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+
+import com.ai.model.*;
+import com.ai.sim.*;
+import com.ai.*;
+
 
 public class SARSA extends RacetrackLearner{
     double learningRate;
