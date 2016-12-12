@@ -12,7 +12,7 @@ public class RaceSimulator {
 
     public RaceSimulator(Racetrack racetrack, CollisionModel collisionModel) {
         this.actionSimulator = new MDPActionSimulator(new RacetrackMDP(racetrack, collisionModel));
-        this.iterationLimit = racetrack.getWidth() * racetrack.getHeight() * 121 * 2;
+        this.iterationLimit = racetrack.getWidth() * racetrack.getHeight() * 121;
     }
 
     public Integer runPolicy(Position start, Policy policy) {
@@ -28,5 +28,9 @@ public class RaceSimulator {
         if (currentState == null)
             return cost;
         return iterationLimit;
+    }
+
+    public boolean atIterationLimit(int iterationCount) {
+        return iterationCount >= iterationLimit;
     }
 }

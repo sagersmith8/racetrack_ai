@@ -25,7 +25,7 @@ public class ValueIteration extends RacetrackLearner {
     private Policy policy = new ValueIterationPolicy();
 
     private static final double GAMMA = 0.7;
-    private static final double EPSILON = 0.01;
+    private static final double EPSILON = 0.0001;
 
     public ValueIteration(Racetrack racetrack, CollisionModel collisionModel) {
         super(racetrack, collisionModel);
