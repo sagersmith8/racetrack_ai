@@ -102,7 +102,7 @@ class StopCollisionModel implements CollisionModel {
             return new State(endPosition, velocity);
         }
 
-        if (endPosition == null) {
+        if (collisionPosition == null) {
             return null;
         }
 
@@ -125,7 +125,7 @@ class RestartCollisionModel implements CollisionModel {
             return new State(endPosition, velocity);
         }
 
-        if (endPosition == null) {
+        if (collisionPosition == null) {
             return null;
         }
 
