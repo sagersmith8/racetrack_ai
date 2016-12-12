@@ -108,27 +108,26 @@ public class Main {
         Map<Racetrack, RacetrackLearner> learners = new HashMap<>();
 
         if (options.hasArgument("learner")) {
-            if (options.hasArgument("learner")) {
-                String learnerName = options.valueOf("learner").toString();
-                switch (learnerName) {
-                    case "sarsa":
-                        logger.debug("Adding Sarsa to tester...");
-                        //TODO add Sarsa
-                        break;
-                    case "value-iteration":
-                        logger.debug("Adding Value iteration to tester...");
-                        //TODO add value iteration
-                        break;
-                    default:
-                        logger.error("Value not recognized: " + learnerName + ". Expected <sarsa> or <value-iteration>...");
-                        logger.error("Throwing runtime exception...");
-                        new RuntimeException("Learner name not recognized");
-                }
-            } else {
-                //TODO add sarsa
-                //TODO add value iteration
+            String learnerName = options.valueOf("learner").toString();
+            switch (learnerName) {
+                case "sarsa":
+                    logger.debug("Adding Sarsa to tester...");
+                    //TODO add Sarsa
+                    break;
+                case "value-iteration":
+                    logger.debug("Adding Value iteration to tester...");
+                    //TODO add value iteration
+                    break;
+                default:
+                    logger.error("Value not recognized: " + learnerName + ". Expected <sarsa> or <value-iteration>...");
+                    logger.error("Throwing runtime exception...");
+                    new RuntimeException("Learner name not recognized");
             }
+        } else {
+            //TODO add sarsa
+            //TODO add value iteration
         }
+
         return learners;
     }
 
