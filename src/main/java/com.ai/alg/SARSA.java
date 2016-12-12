@@ -32,12 +32,34 @@ public class SARSA extends RacetrackLearner{
 
 	iterationLimit = racetrack.getWidth()*racetrack.getHeight()*2;
 
-	//set value of finish state to 0
+	State finishState;
+	//set Q-value of the finish states to 0
+	for(Position finishPosition : racetrack.finishLine()){
+	    //for all possible velocities
+	    for(int i=-5; i<=5; i++){
+		for(int j=-5; j<=5; j++){
+		    finishState = new State(finishPosition, new Velocity(i,j));
+		    qTable.put(finishState, new HashMap<Action, Double>());
+		    Map<Action, Double> possibleActions = qTable.get(finishState);
+		    for(int k=-1; k<=1; k++){
+			for(int l=-1; l<=1; l++){
+			    possibleActions.put(new Action(k,l), 0.0);
+			}
+		    }
+		}
+	    }
+	}
     }
 
     class SARSAPolicy implements Policy{
+	/**
+	 * Returns an action based on a given state, using epsilon greedy
+	 *
+	 * @param state the state to act within
+	 * @return the action to take in the given state
+	 */
 	public Action getAction(State state){
-	    if(Math.random() < 1/TIMES_TO_VISIT*timesVisited.getOrDefault(state,0)){//get epsilon
+	    if(Math.random() < 1.0/TIMES_TO_VISIT*timesVisited.getOrDefault(state,0)){//get epsilon
 		double bestUtility = Double.MAX_VALUE;
 		Action argMax = new Action(0,0);//
 		Map<Action, Double> actions = qTable.get(state);
@@ -52,13 +74,20 @@ public class SARSA extends RacetrackLearner{
 		return getRandomAction();
 	    }
 	}
-
+	/**
+	 * Returns a random valid action
+	 *
+	 * @return The randomly chosen action to take
+	 */
 	public Action getRandomAction(){
-	    return new Action((int)(Math.random()*2-1), (int)(Math.random()*2-1));
+	    return new Action((int)(Math.random()*3-1), (int)(Math.random()*3-1));
 	}
     }
     
-    //do another increment of learning
+    /**
+     * Does an increment of learning, starts at a random valid point,
+     * and continues until it crosses the finish line.
+     */
     public void next(){
 	int xPos, yPos, xVel, yVel;
 	Position curPos;
@@ -74,8 +103,8 @@ public class SARSA extends RacetrackLearner{
 	    curPos = new Position(xPos, yPos);
 	}while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
 	
-	xVel = (int)(Math.random()*11-5);
-	yVel = (int)(Math.random()*11-5);
+	xVel = (int)(Math.random()*12-5);
+	yVel = (int)(Math.random()*12-5);
 	do {
 	    states.clear();
 	    actions.clear();
@@ -108,7 +137,9 @@ public class SARSA extends RacetrackLearner{
 	    
 	    qTable.get(state).put(action, ((1 - LEARNING_RATE) * qTable.get(state).get(action) +
 						 LEARNING_RATE * (1 + GAMMA * nextStateActionUtility)));
+	    timesVisited.put(state, timesVisited.getOrDefault(state, 0)+1);
 	}
+	iterationCount += states.size();
 		
     }
     public boolean finished(){
