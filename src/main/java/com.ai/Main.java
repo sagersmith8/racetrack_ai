@@ -223,16 +223,22 @@ public class Main {
         }
     }
 
-    private static Double[][] runLearner(RacetrackLearner learner, PolicyTester tester) {
-        return null;
+    private static List<Result> runLearner(RacetrackLearner learner, PolicyTester tester, Integer maxIterations) {
+        List<Result> results = new ArrayList<>();
+        while (!learner.finished() && learner.getIterationCount() <= maxIterations) {
+            learner.next();
+            Policy policy = learner.getPolicy();
+            results.add(tester.testPolicy(policy, maxIterations));
+        }
+        return results;
     }
 
     private static void multiThreadedRun(Map<Racetrack, RacetrackLearner> learners, Map<Racetrack, List<PolicyTester>> policyTesters, Integer maxIteration) throws Exception{
         ExecutorService executor = Executors.newWorkStealingPool();
-        List<Callable<Double[][]>> callables = new ArrayList<>();
+        List<Callable<List<Result>>> callables = new ArrayList<>();
         for (Map.Entry<Racetrack, RacetrackLearner> entry : learners.entrySet()) {
             for (PolicyTester tester : policyTesters.get(entry.getKey())) {
-                callables.add(() -> runLearner(entry.getValue(), tester));
+                callables.add(() -> runLearner(entry.getValue(), tester, maxIteration));
             }
         }
 
