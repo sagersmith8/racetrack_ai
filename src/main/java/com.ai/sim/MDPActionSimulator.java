@@ -5,6 +5,9 @@ import com.ai.model.State;
 
 import java.util.List;
 
+/**
+ * A simulator for simulating the non-deterministic results of actions on a MDP.
+ */
 public class MDPActionSimulator implements ActionSimulator {
     private MDP mdp;
 

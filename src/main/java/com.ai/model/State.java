@@ -2,19 +2,40 @@ package com.ai.model;
 
 import java.util.Objects;
 
+/**
+ * An object encapsulating an agent's state a particular time.
+ *
+ * This consists entirely of a position and a velocity.
+ */
 public class State {
     private final Position position;
     private final Velocity velocity;
 
+    /**
+     * Make a state for a given position and velocity
+     *
+     * @param position the state's position
+     * @param velocity the state's velocity
+     */
     public State(Position position, Velocity velocity) {
         this.position = position;
         this.velocity = velocity;
     }
 
+    /**
+     * Gives this state's position.
+     *
+     * @return the state's position
+     */
     public Position getPosition() {
         return position;
     }
 
+    /**
+     * Gives this state's velocity.
+     *
+     * @return the state's velocity
+     */
     public Velocity getVelocity() {
         return velocity;
     }

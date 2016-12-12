@@ -12,6 +12,14 @@ import com.ai.sim.PotentialState;
 import com.ai.sim.RacetrackMDP;
 import org.apache.log4j.Logger;
 
+/**
+ * Implementation of the MDP-based learner, value-iteration.
+ *
+ * Starts with Uniform(0, 1) random utilities and iteratively all the utilities at once
+ * based on the utilities from the previous time step.
+ *
+ * The utility for a given state is updated to be: -1 + GAMMA * bestExpectedUtility(s, a) over all actions
+ */
 public class ValueIteration extends RacetrackLearner {
     private static final Logger logger = Logger.getLogger(ValueIteration.class);
 
@@ -27,6 +35,12 @@ public class ValueIteration extends RacetrackLearner {
     private static final double GAMMA = 0.7;
     private static final double EPSILON = 0.0001;
 
+    /**
+     * Make a new value-iteration learner.
+     *
+     * @param racetrack the racetrack to learn
+     * @param collisionModel the collision model to use
+     */
     public ValueIteration(Racetrack racetrack, CollisionModel collisionModel) {
         super(racetrack, collisionModel);
 
@@ -55,6 +69,9 @@ public class ValueIteration extends RacetrackLearner {
         }
     }
 
+    /**
+     * Performs one "round" of value iteration in which all of the utilities are updated once.
+     */
     @Override
     public void next() {
         if (finished) {
@@ -64,6 +81,7 @@ public class ValueIteration extends RacetrackLearner {
         double maxDelta = 0;
         double[][][][] nextUtility = new double[racetrack.getWidth()][racetrack.getHeight()][11][11];
 
+	//iterate over all of the states
         for (int x = 0; x < racetrack.getWidth(); x++) {
             for (int y = 0; y < racetrack.getHeight(); y++) {
                 Position position = new Position(x, y);
@@ -71,12 +89,12 @@ public class ValueIteration extends RacetrackLearner {
                 if (!racetrack.isSafe(position) ||racetrack.finishLine().contains(position)) {
                     continue;
                 }
-                iterationCount += 121 * 9;
+                iterationCount += 121 * 9; //count all of the expected utilities to be calculated
                 for (int vx = -5; vx <= 5; vx++) {
                     for (int vy = -5; vy <= 5; vy++) {
                         State state = new State(position, new Velocity(vx, vy));
 
-
+			//find the best expected utility over all of the actions
                         double bestExpectedUtility = Double.NEGATIVE_INFINITY;
                         Action bestAction = null;
                         for (int ax = -1; ax <= 1; ax++) {
@@ -91,6 +109,7 @@ public class ValueIteration extends RacetrackLearner {
                                 
                             }
                         }
+			//set the policy based on which action gave the best expected utility
                         bestActions[x][y][vx + 5][vy + 5] = bestAction;
 
                         nextUtility[x][y][vx + 5][vy + 5] = -1 + GAMMA * bestExpectedUtility;
@@ -103,6 +122,12 @@ public class ValueIteration extends RacetrackLearner {
         finished = maxDelta < EPSILON * (1 - GAMMA) / GAMMA;
     }
 
+    /**
+     * Lookup the state's utility in the utility table.
+     *
+     * @param state the state to lookup
+     * @return the state's utility
+     */
     private double getUtility(State state) {
         //terminal states have utility 0
         if (state == null) {
@@ -114,6 +139,14 @@ public class ValueIteration extends RacetrackLearner {
         return utility[position.getX()][position.getY()][velocity.getX() + 5][velocity.getY() + 5];
     }
 
+    /**
+     * Compute the expected utility of performing a given action in a given state based on the
+     * transition model provided by the known MDP.
+     *
+     * @param state the state in which the action is performed
+     * @param action the action to consider
+     * @return the expected utility of the given state-action based on known utilities.
+     */
     private double expectedUtility(State state, Action action) {
         double expectedUtility = 0;
         for (PotentialState potentialState : mdp.getNextStates(state, action)) {
@@ -141,7 +174,8 @@ public class ValueIteration extends RacetrackLearner {
         public Action getAction(State state) {
             Position position = state.getPosition();
             Velocity velocity = state.getVelocity();
-            
+
+	    //lookup the best action based on the pre-determined actions which gave the maximum expected utility
             return bestActions[position.getX()][position.getY()][velocity.getX() + 5][velocity.getY() + 5];
         }
     }
