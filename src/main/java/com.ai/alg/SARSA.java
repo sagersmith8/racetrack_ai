@@ -9,7 +9,9 @@ import com.ai.model.State;
 import com.ai.model.Velocity;
 import com.ai.sim.CollisionModel;
 import com.ai.sim.MDPActionSimulator;
+import com.ai.sim.RaceSimulator;
 import com.ai.sim.RacetrackMDP;
+
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -21,8 +23,8 @@ import java.util.Map;
  * Implementation of the SARSA algorithm using an off-line training algorithm.
  */
 public class SARSA extends RacetrackLearner {
-    private static final double LEARNING_RATE = 0.85;
-    private static final double GAMMA = 0.2;
+    private static final double LEARNING_RATE = 0.5;
+    private static final double GAMMA = 0.7;
     private static final int TIMES_TO_VISIT = 30;
 
     private static final Logger logger = Logger.getLogger(Main.class);
@@ -40,7 +42,7 @@ public class SARSA extends RacetrackLearner {
         aSim = new MDPActionSimulator(new RacetrackMDP(racetrack, collisionModel));
         policy = new SARSAPolicy();
 
-        iterationLimit = racetrack.getWidth()*racetrack.getHeight()*121*9*2;
+        iterationLimit = racetrack.getWidth()*racetrack.getHeight()*121;
     }
 
     class SARSAPolicy implements Policy {
@@ -57,18 +59,18 @@ public class SARSA extends RacetrackLearner {
                 return getRandomAction();
             }
 
-            double bestCost = Double.MAX_VALUE;
+            double bestCost = Double.NEGATIVE_INFINITY;
             Action argMax = null;
-            Map<Action, Double> actions = qTable.getOrDefault(state, new HashMap<>());
+	    if (!qTable.containsKey(state)) {
+		qTable.put(state, randomActionMap());
+	    }
+
+            Map<Action, Double> actions = qTable.get(state);
             for(Action action : actions.keySet()) {
-                if(actions.get(action) < bestCost) {
+                if(actions.get(action) > bestCost) {
                     argMax = action;
                     bestCost = actions.get(action);
                 }
-            }
-
-            if (argMax == null) {
-                return getRandomAction();
             }
 
             return argMax;
@@ -82,7 +84,8 @@ public class SARSA extends RacetrackLearner {
             return new Action((int)(Math.random()*3)-1, (int)(Math.random()*3)-1);
         }
     }
-    
+
+    private int count = 0;
     /**
      * Does an increment of learning, starting runs in random states until a run
      * reaches a finishing state, and then applies SARSA to the successful run.
@@ -96,23 +99,20 @@ public class SARSA extends RacetrackLearner {
         Action curAction;
         List<Action> actions = new ArrayList<>();
         List<State> states = new ArrayList<>();
+	do {
+	    //determine random starting location and velocity
+	    do {
+		xPos = (int)(Math.random()*racetrack.getWidth());
+		yPos = (int)(Math.random()*racetrack.getHeight());
+		curPos = new Position(xPos, yPos);
+	    } while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
 
-        //determine random starting location and velocity
-        do {
-            xPos = (int)(Math.random()*racetrack.getWidth());
-            yPos = (int)(Math.random()*racetrack.getHeight());
-            curPos = new Position(xPos, yPos);
+	    xVel = (int)(Math.random()*12)-5;
+	    yVel = (int)(Math.random()*12)-5;
 
-            logger.debug("SARSA finding starting position: " + xPos + "," + yPos);
-        } while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
-
-        xVel = (int)(Math.random()*12)-5;
-        yVel = (int)(Math.random()*12)-5;
-        do {
             states.clear();
             actions.clear();
 
-            curPos = new Position(xPos, yPos);
             curVel = new Velocity(xVel, yVel);
             curState = new State(curPos, curVel);
 
@@ -125,33 +125,67 @@ public class SARSA extends RacetrackLearner {
                 states.add(curState);
                 curState = aSim.getNextState(curState, curAction);
             }
-
-            if (curState != null) {
-                logger.debug("SARSA reached iteration limit, trying again...");
-            }
-        } while (curState != null);
+	} while (curState != null && count % 2 == 0);
 
         for (int i = 0; i < states.size(); i++) {
             State state = states.get(i);
             Action action = actions.get(i);
-            double nextStateActionUtility = 0;
+            double nextStateActionUtility = curState == null ? 0 : -1000.0;
 
             if (i < states.size() - 1) {
                 State nextState = states.get(i + 1);
                 Action nextAction = actions.get(i + 1);
-                nextStateActionUtility = qTable.getOrDefault(nextState, new HashMap<>()).getOrDefault(nextAction, Math.random());
+		if (!qTable.containsKey(nextState)) {
+		    qTable.put(nextState, randomActionMap());
+		}
+
+                nextStateActionUtility = qTable.get(nextState).get(nextAction);
             }
 
-            qTable.getOrDefault(state, new HashMap<>()).put(action, ((1 - LEARNING_RATE) * qTable.getOrDefault(state, new HashMap<>()).getOrDefault(action, 0.0) +
-                                                                     LEARNING_RATE * (1 + GAMMA * nextStateActionUtility)));
+	    if (!qTable.containsKey(state)) {
+		qTable.put(state, randomActionMap());
+	    }
+
+
+	    qTable.get(state).put(action, ((1.0 - LEARNING_RATE) * qTable.get(state).get(action) +
+					   LEARNING_RATE * (-1.0 + GAMMA * nextStateActionUtility)));
             timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 1);
+
         }
         iterationCount += states.size();
+
+
+	if (count % 10 == 0) {
+	    printSamplePolicy();
+	    printSamplePolicy();
+	}
+	count++;
+    }
+
+    private Map<Action, Double> randomActionMap() {
+	Map<Action, Double> randomMap = new HashMap<>();
+	for (int vx = -1; vx <= 1; vx++) {
+	    for (int vy = -1; vy <= 1; vy++) {
+		randomMap.put(new Action(vx, vy), Math.random());
+	    }
+	}
+
+	return randomMap;
+    }
+
+    private void printSamplePolicy() {
+	RaceSimulator raceSimulator = new RaceSimulator(racetrack, collisionModel);
+	Position startingPosition = racetrack.randomStartingPosition();
+
+	if (logger.isDebugEnabled()) {
+	    logger.debug("Policy Map at Iteration "+getIterationCount());
+	    logger.debug(raceSimulator.printPolicyMap(raceSimulator.policyMap(startingPosition, getPolicy())));
+	}
     }
 
     @Override
     public boolean finished() {
-        return iterationCount >= 200000;
+        return false;
     }
 
     @Override

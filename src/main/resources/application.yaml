@@ -1,4 +1,7 @@
 logging:
+  file: sample_runs/new.log
+  pattern:
+    file: "%msg%n"
   level:
     ROOT: 'debug'
     jndi: 'warn'
