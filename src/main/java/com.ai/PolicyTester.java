@@ -1,5 +1,8 @@
 package com.ai;
 
+import com.ai.sim.CollisionModel;
+import com.ai.sim.RaceSimulator;
+
 import java.util.ArrayList;
 import java.util.List;
 

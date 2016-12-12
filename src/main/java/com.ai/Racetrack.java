@@ -1,5 +1,7 @@
 package com.ai;
 
+import com.ai.model.Position;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

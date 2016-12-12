@@ -1,5 +1,8 @@
 package com.ai;
 
+import com.ai.alg.RacetrackLearner;
+import com.ai.sim.Collision;
+import com.ai.sim.CollisionModel;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.log4j.Level;
