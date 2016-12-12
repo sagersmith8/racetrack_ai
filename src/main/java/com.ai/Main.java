@@ -196,7 +196,7 @@ public class Main {
                 logger.debug("Adding every racetrack in the registry...");
                 racetracks.addAll(racetrackRegistry.values());
             } else {
-                logger.debug("Adding the specified racetrack" + racetrackRegistry.get(options.valueOf("racetrack").toString())+" ...");
+                logger.debug("Adding the specified racetrack: " + racetrackRegistry.get(options.valueOf("racetrack").toString())+" ...");
                 racetracks.add(racetrackRegistry.get(options.valueOf("racetrack").toString()));
             }
         } else {
@@ -262,11 +262,14 @@ public class Main {
 
     private static List<Result> runLearner(RacetrackLearner learner, PolicyTester tester, Integer maxIterations) {
         List<Result> results = new ArrayList<>();
+        logger.debug("Starting "+learner+ " "+tester+ "...");
         while (!learner.finished() && learner.getIterationCount() <= maxIterations) {
+            logger.debug("Current iteration: "+learner.getIterationCount()+ "...");
             learner.next();
             Policy policy = learner.getPolicy();
-            results.add(tester.testPolicy(policy, maxIterations));
+            results.add(tester.testPolicy(policy));
         }
+        logger.debug("Finished "+learner+ " "+tester+ "...");
 
         if (learner.finished()) {
             logger.debug(learner + " finished!");
