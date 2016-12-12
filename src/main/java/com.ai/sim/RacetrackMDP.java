@@ -1,7 +1,11 @@
-package com.ai;
+package com.ai.sim;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ai.Racetrack;
+import com.ai.model.Action;
+import com.ai.model.State;
 
 public class RacetrackMDP implements MDP {
     private final ActionSimulator racetrackSimulator;

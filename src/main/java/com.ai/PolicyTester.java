@@ -3,6 +3,9 @@ package com.ai;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ai.sim.CollisionModel;
+import com.ai.sim.RaceSimulator;
+
 public class PolicyTester {
     private final Racetrack racetrack;
     private final RaceSimulator raceSimulator;

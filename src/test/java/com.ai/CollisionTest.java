@@ -1,8 +1,12 @@
-package com.ai;
+package com.ai.sim;
 
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.ai.Racetrack;
+import com.ai.model.Position;
+import com.ai.model.Velocity;
 
 public class CollisionTest {
     public Racetrack readTrackOrFail(String file) {

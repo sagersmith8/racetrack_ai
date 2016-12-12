@@ -4,15 +4,9 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 
-@Configuration
-@SpringBootApplication
-@ComponentScan
 public class Main {
     public static final Logger logger = Logger.getLogger(Main.class);
 
