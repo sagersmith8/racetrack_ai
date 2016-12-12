@@ -7,6 +7,12 @@ import com.ai.Racetrack;
 import com.ai.model.Action;
 import com.ai.model.State;
 
+/**
+ * Represents the MDP for the racetrack problem.
+ *
+ * Essentially, this MDP consists of applying the acceleration 80% of the time,
+ * and applying no acceleration otherwise.
+ */
 public class RacetrackMDP implements MDP {
     private final ActionSimulator racetrackSimulator;
 
@@ -14,6 +20,12 @@ public class RacetrackMDP implements MDP {
     private final double ACTION_FAIL_RATE = 1 - ACTION_SUCCESS_RATE;
     private final Action FAIL_ACTION = new Action(0, 0);
 
+    /**
+     * Makes an MDP for the given racetrack and collision model.
+     *
+     * @param racetrack the MDP's racetrack
+     * @param collisionModel the MDP's collision model
+     */
     public RacetrackMDP(Racetrack racetrack, CollisionModel collisionModel) {
         this.racetrackSimulator = new DeterministicRacetrackSimulator(racetrack, collisionModel);
     }

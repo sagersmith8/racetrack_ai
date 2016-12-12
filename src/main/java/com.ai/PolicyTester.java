@@ -6,6 +6,9 @@ import com.ai.sim.RaceSimulator;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for testing how well a given policy performs on a given track and collision model.
+ */
 public class PolicyTester {
     private final Racetrack racetrack;
     private final RaceSimulator raceSimulator;
@@ -31,10 +34,24 @@ public class PolicyTester {
         return collisionModel;
     }
 
+    /**
+     * Test the specified policy with the default number of tests.
+     *
+     * @param policy the policy to test
+     * @return the result of testing the policy
+     */
     public Result testPolicy(Policy policy) {
         return testPolicy(policy, numTests);
     }
 
+    /**
+     * Test the specified policy with the specified number of tests.
+     *
+     * If the first `EARLY_STOP_TESTS` all don't terminate, stop the testing early.
+     *
+     * @param policy the policy to test
+     * @return the result of testing the policy
+     */
     public Result testPolicy(Policy policy, int numTests) {
         List<Integer> runData = new ArrayList<>();
         boolean terminated = false;
@@ -53,15 +70,29 @@ public class PolicyTester {
     }
 }
 
+/**
+ * Class for a sample of run lengths for a policy and calculating statistics on that sample.
+ * It can calculate the mean, variance, and confidence interval for each sample.
+ */
 class Result {
     private final List<Integer> data;
 
     private Double mean, variance, confidence;
 
+    /**
+     * Make a new result from a list of run lengths.
+     *
+     * @param data the list of run lengths to generate statistics from
+     */
     public Result(List<Integer> data) {
         this.data = data;
     }
 
+    /**
+     * Generates or retrieves the mean for the given sample data.
+     *
+     * @return the mean for the data
+     */
     public double getMean() {
         if (mean == null) {
             double sum = 0.0;
@@ -74,6 +105,11 @@ class Result {
         return mean;
     }
 
+    /**
+     * Generates or retrieves the variance for the given sample data.
+     *
+     * @return the variance for the data
+     */
     public double getVariance() {
         if (variance == null) {
             double mean = getMean();
@@ -87,6 +123,11 @@ class Result {
         return variance;
     }
 
+    /**
+     * Generates or retrieves the 95% confidence interval for the given sample data.
+     *
+     * @return the confidence interval for the data
+     */
     public double getConfidence() {
         if (confidence == null) {
             double variance = getVariance();
