@@ -1,20 +1,20 @@
 package com.ai;
 
+import com.ai.model.Position;
+
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.ai.model.Position;
-
 public class Racetrack {
     private final boolean[][] isSafe;
     private final int width, height;
+    private String name = "No name specified";
     
     private final Set<Position> startingLine;
     private final Set<Position> finishLine;
@@ -28,8 +28,13 @@ public class Racetrack {
         this.finishLine = Collections.unmodifiableSet(finishLine);
     }
 
-    public static Racetrack fromFile(String filename) throws FileNotFoundException, IOException {
-        return fromStream(ClassLoader.getSystemClassLoader()
+    public Racetrack withName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public static Racetrack fromFile(String filename) throws IOException {
+        return fromStream(Thread.currentThread().getContextClassLoader()
                           .getResourceAsStream(filename));
     }
 
@@ -58,6 +63,11 @@ public class Racetrack {
         }
 
         return new Racetrack(isSafe, startingLine, finishLine);
+    }
+
+    @Override
+    public String toString() {
+        return "Racetrack("+name+")";
     }
 
     public boolean isSafe(Position position) {

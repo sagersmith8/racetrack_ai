@@ -1,12 +1,7 @@
 package com.ai.alg;
 
-import org.apache.log4j.Logger;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import com.ai.Racetrack;
 import com.ai.Policy;
+import com.ai.Racetrack;
 import com.ai.model.Action;
 import com.ai.model.Position;
 import com.ai.model.State;
@@ -15,6 +10,7 @@ import com.ai.sim.CollisionModel;
 import com.ai.sim.MDP;
 import com.ai.sim.PotentialState;
 import com.ai.sim.RacetrackMDP;
+import org.apache.log4j.Logger;
 
 public class ValueIteration extends RacetrackLearner {
     private static final Logger logger = Logger.getLogger(ValueIteration.class);
@@ -36,6 +32,7 @@ public class ValueIteration extends RacetrackLearner {
 
         mdp = new RacetrackMDP(racetrack, collisionModel);
         utility = new double[racetrack.getWidth()][racetrack.getHeight()][11][11];
+        bestActions = new Action[racetrack.getWidth()][racetrack.getHeight()][11][11];
 
         initializeUtilities();
     }
@@ -106,7 +103,6 @@ public class ValueIteration extends RacetrackLearner {
         if (state == null) {
             return 0.0;
         }
-        
         Position position = state.getPosition();
         Velocity velocity = state.getVelocity();
         

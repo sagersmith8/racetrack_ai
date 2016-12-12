@@ -38,4 +38,9 @@ public class Action {
         return this.xAcceleration == other.xAcceleration &&
                this.yAcceleration == other.yAcceleration;
     }
+
+    @Override
+    public String toString() {
+        return "{" + xAcceleration + ", " + yAcceleration + "}";
+    }
 }

@@ -1,15 +1,21 @@
 package com.ai.alg;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-
-import com.ai.model.*;
-import com.ai.sim.*;
-import com.ai.*;
-
+import com.ai.Main;
+import com.ai.Policy;
+import com.ai.Racetrack;
+import com.ai.model.Action;
+import com.ai.model.Position;
+import com.ai.model.State;
+import com.ai.model.Velocity;
+import com.ai.sim.CollisionModel;
+import com.ai.sim.MDPActionSimulator;
+import com.ai.sim.RacetrackMDP;
 import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class SARSA extends RacetrackLearner{
@@ -25,16 +31,16 @@ public class SARSA extends RacetrackLearner{
     private Map<State, Integer> timesVisited = new HashMap<>();
     private MDPActionSimulator aSim;
     private Policy policy;
-    private int iterationLimit;
+    private int iterationLimit = Integer.MAX_VALUE;
 
     public SARSA(Racetrack racetrack, CollisionModel collisionModel){
-	super(racetrack, collisionModel);
+		super(racetrack, collisionModel);
 
-	aSim = new MDPActionSimulator(new RacetrackMDP(racetrack, collisionModel));
+		aSim = new MDPActionSimulator(new RacetrackMDP(racetrack, collisionModel));
 
-	policy = new SARSAPolicy();
+		policy = new SARSAPolicy();
 
-	iterationLimit = racetrack.getWidth()*racetrack.getHeight()*2;
+		iterationLimit = racetrack.getWidth()*racetrack.getHeight()*121*9*2;
     }
 
     class SARSAPolicy implements Policy{
@@ -45,20 +51,26 @@ public class SARSA extends RacetrackLearner{
 	 * @return the action to take in the given state
 	 */
 	public Action getAction(State state){
-	    if(Math.random() < (double)timesVisited.getOrDefault(state,0)/TIMES_TO_VISIT){//get epsilon
-		double bestCost = Double.MAX_VALUE;
-		Action argMax = new Action(0,0);//
-		Map<Action, Double> actions = qTable.getOrDefault(state, new HashMap<Action, Double>());
-		for(Action action : actions.keySet()){
-		    if(actions.get(action) < bestCost) {
-			argMax = action;
-			bestCost = actions.get(action);
-		    }
+		// get epsilon
+	    if (Math.random() > (double)timesVisited.getOrDefault(state,0)/TIMES_TO_VISIT) {
+			return getRandomAction();
 		}
+
+		double bestCost = Double.MAX_VALUE;
+		Action argMax = null;
+		Map<Action, Double> actions = qTable.getOrDefault(state, new HashMap<>());
+		for(Action action : actions.keySet()){
+			if(actions.get(action) < bestCost) {
+				argMax = action;
+				bestCost = actions.get(action);
+			}
+		}
+
+		if (argMax == null) {
+			return getRandomAction();
+		}
+
 		return argMax;
-	    }else{
-		return getRandomAction();
-	    }
 	}
 	/**
 	 * Returns a random valid action
@@ -66,7 +78,7 @@ public class SARSA extends RacetrackLearner{
 	 * @return The randomly chosen action to take
 	 */
 	public Action getRandomAction(){
-	    return new Action((int)(Math.random()*3-1), (int)(Math.random()*3-1));
+	    return new Action((int)(Math.random()*3)-1, (int)(Math.random()*3)-1);
 	}
     }
     
@@ -91,8 +103,8 @@ public class SARSA extends RacetrackLearner{
 	    logger.debug("SARSA finding starting position: " + xPos + "," + yPos);
 	} while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
 	
-	xVel = (int)(Math.random()*12-5);
-	yVel = (int)(Math.random()*12-5);
+	xVel = (int)(Math.random()*12)-5;
+	yVel = (int)(Math.random()*12)-5;
 	do {
 	    states.clear();
 	    actions.clear();
@@ -102,18 +114,18 @@ public class SARSA extends RacetrackLearner{
 	    curState = new State(curPos, curVel);
 
 	    //while we have not crossed the finish or reached our iteration limit
-	    for(int i=0; curState != null && i<iterationLimit; i++){
-		//get next action
-		curAction = policy.getAction(curState);
-		actions.add(curAction);
+	    for (int i=0; curState != null && i<iterationLimit; i++) {
+			//get next action
+			curAction = policy.getAction(curState);
+			actions.add(curAction);
 
-		states.add(curState);
-		curState = aSim.getNextState(curState, curAction);
+			states.add(curState);
+			curState = aSim.getNextState(curState, curAction);
 	    }
 
 	    if(curState != null){
-		logger.debug("SARSA reached iteration limit, trying again...");
-	    }
+			logger.debug("SARSA reached iteration limit, trying again...");
+		}
 	} while (curState != null);
 
 	for (int i = 0; i < states.size(); i++) {
@@ -124,18 +136,20 @@ public class SARSA extends RacetrackLearner{
 	    if (i < states.size() - 1) {
 		State nextState = states.get(i + 1);
 		Action nextAction = actions.get(i + 1);		
-		nextStateActionUtility = qTable.getOrDefault(nextState, new HashMap<Action, Double>()).getOrDefault(nextAction, Math.random());
+		nextStateActionUtility = qTable.getOrDefault(nextState, new HashMap<>()).getOrDefault(nextAction, Math.random());
 	    }
 	    
-	    qTable.get(state).put(action, ((1 - LEARNING_RATE) * qTable.get(state).get(action) +
-						 LEARNING_RATE * (1 + GAMMA * nextStateActionUtility)));
+	    qTable.getOrDefault(state, new HashMap<>()).put(
+	    		action, ((1 - LEARNING_RATE) * qTable.getOrDefault(state, new HashMap<>()).getOrDefault(action, 0.0) +
+						 LEARNING_RATE * (1 + GAMMA * nextStateActionUtility))
+		);
 	    timesVisited.put(state, timesVisited.getOrDefault(state, 0)+1);
 	}
 	iterationCount += states.size();
 		
     }
     public boolean finished(){
-	return false;
+		return iterationCount >= 200000;
     }
 
     public Policy getPolicy(){

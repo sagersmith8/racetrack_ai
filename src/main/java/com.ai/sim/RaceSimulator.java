@@ -27,6 +27,6 @@ public class RaceSimulator {
 
         if (currentState == null)
             return cost;
-        return null;
+        return iterationLimit;
     }
 }

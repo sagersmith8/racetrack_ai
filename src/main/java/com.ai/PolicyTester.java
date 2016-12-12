@@ -1,14 +1,15 @@
 package com.ai;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ai.sim.CollisionModel;
 import com.ai.sim.RaceSimulator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PolicyTester {
     private final Racetrack racetrack;
     private final RaceSimulator raceSimulator;
+    private final CollisionModel collisionModel;
 
     private final int numTests;
 
@@ -22,6 +23,11 @@ public class PolicyTester {
         this.racetrack = racetrack;
         this.raceSimulator = new RaceSimulator(racetrack, collisionModel);
         this.numTests = numTests;
+        this.collisionModel = collisionModel;
+    }
+
+    public CollisionModel collisionModel() {
+        return collisionModel;
     }
 
     public Result testPolicy(Policy policy) {
