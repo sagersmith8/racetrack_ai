@@ -23,6 +23,16 @@ public class DeterministicRacetrackSimulator implements ActionSimulator {
         this.collisionModel = collisionModel;
     }
 
+    /**
+     * Determines the state that follows when deterministically applying the given action.
+     *
+     * First updates the velocity with the action's acceleartion, then checks collision to
+     * determine where the agent ends up.
+     *
+     * @param state the current state
+     * @param action the action to apply
+     * @return the state following the given state after applying the given action
+     */
     public State getNextState(State state, Action action) {
         Velocity prevVelocity = state.getVelocity();
         Velocity nextVelocity = new Velocity(prevVelocity.getX() + action.getXAcceleration(),
