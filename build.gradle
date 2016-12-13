@@ -116,6 +116,7 @@ dependencies {
         exclude(module: "spring-boot-starter-tomcat")
         exclude(group: "org.hibernate")
     }
+    compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
     compile(group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.1')
     compile group: 'com.google.guava', name: 'guava', version: '19.0'
     compile (group: 'com.github.rschmitt', name: 'dynamic-object', version: '1.6.0')
