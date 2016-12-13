@@ -1,5 +1,6 @@
 package com.ai;
 
+import com.ai.alg.QLearning;
 import com.ai.alg.RacetrackLearner;
 import com.ai.alg.SARSA;
 import com.ai.alg.ValueIteration;
@@ -136,6 +137,18 @@ public class Main {
                         }
                     }
                     break;
+
+                case "qlearning":
+                    logger.debug("Adding Qlearning to tester...");
+                    for (Racetrack racetrack : racetracks) {
+                        Map<CollisionModel, List<RacetrackLearner>> collisionMap = new HashMap<>();
+                        learners.put(racetrack, collisionMap);
+                        for (CollisionModel collisionModel: collisonModels) {
+                            collisionMap.put(collisionModel, Arrays.asList(new QLearning(racetrack, collisionModel)));
+                        }
+                    }
+                    break;
+
                 case "value-iteration":
                     logger.debug("Adding Value iteration to tester...");
                     for (Racetrack racetrack : racetracks) {
@@ -147,7 +160,7 @@ public class Main {
                     }
                     break;
                 default:
-                    logger.error("Value not recognized: " + learnerName + ". Expected <sarsa> or <value-iteration>...");
+                    logger.error("Value not recognized: " + learnerName + ". Expected <sarsa>, <qlearning> or <value-iteration>...");
                     logger.error("Throwing runtime exception...");
                     new RuntimeException("Learner name not recognized");
             }
@@ -156,7 +169,7 @@ public class Main {
                 Map<CollisionModel, List<RacetrackLearner>> collisionMap = new HashMap<>();
                 learners.put(racetrack, collisionMap);
                 for (CollisionModel collisionModel: collisonModels) {
-                    collisionMap.put(collisionModel, Arrays.asList(new SARSA(racetrack, collisionModel), new ValueIteration(racetrack, collisionModel)));
+                    collisionMap.put(collisionModel, Arrays.asList(new SARSA(racetrack, collisionModel), new QLearning(racetrack, collisionModel), new ValueIteration(racetrack, collisionModel)));
                 }
             }
         }
