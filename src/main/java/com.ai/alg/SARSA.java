@@ -142,11 +142,16 @@ public class SARSA extends RacetrackLearner {
                 nextStateActionUtility = qTable.getOrDefault(nextState, new HashMap<>()).getOrDefault(nextAction, Math.random());
             }
 
-            qTable.getOrDefault(state, new HashMap<>()).put(action, ((1 - LEARNING_RATE) * qTable.getOrDefault(state, new HashMap<>()).getOrDefault(action, 0.0) +
+            qTable.getOrDefault(state, new HashMap<>()).put(action, ((1 - LEARNING_RATE) * qTable.getOrDefault(state, new HashMap<>()).getOrDefault(action, 1.0) +
                                                                      LEARNING_RATE * (1 + GAMMA * nextStateActionUtility)));
             timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 1);
         }
         iterationCount += states.size();
+    }
+
+    @Override
+    public String toString () {
+        return "SARSA";
     }
 
     @Override
