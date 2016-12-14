@@ -184,6 +184,11 @@ public class SARSA extends RacetrackLearner {
     }
 
     @Override
+    public String toString () {
+        return "SARSA";
+    }
+
+    @Override
     public boolean finished() {
         return false;
     }
