@@ -22,6 +22,7 @@ import org.springframework.boot.SpringApplication;
 
 import java.awt.*;
 import java.io.File;
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -340,9 +341,17 @@ public class Main {
         int width = 800; /* Width of the image */
         int height = 600; /* Height of the image */
         File fullLineChart = new File("results/"+title+".png" );
-        File afterIterationChart = new File("results/"+title+" after iteration limit.png" );
+        File afterIterationChart = new File("results/"+title+".afterlimit.png" );
         ChartUtilities.saveChartAsPNG(fullLineChart ,fullChart, width ,height);
         ChartUtilities.saveChartAsPNG(afterIterationChart ,afterIterationCount, width ,height);
+    }
+
+    private static void saveData(String title, List<Integer> iterationCounts, List<Double> means, List<Double> confidence) throws IOException {
+	PrintWriter out = new PrintWriter(new File("results/"+title+".csv"));
+	for(int i = 0; i < iterationCounts.size(); i++) {
+	    out.println(String.join(",", ""+iterationCounts.get(i), ""+means.get(i), ""+(means.get(i) - confidence.get(i)), ""+(means.get(i) + confidence.get(i))));
+	}
+	out.close();
     }
 
     /**
@@ -359,25 +368,33 @@ public class Main {
         List<Double> confidence = new ArrayList<>();
         List<Double> means = new ArrayList<>();
         Integer iterationLimit = null;
+	String title = learner.toString().toLowerCase().replaceAll(" ", "-") + "." + tester.getRacetrack() + "." + tester.collisionModel().toString().replaceAll(" ","-") + "." + new java.util.Date().toString().toLowerCase().replaceAll(" ", "-");	
         logger.info("Starting "+learner+ " "+tester+ "...");
-        while (!learner.finished() && learner.getIterationCount() <= maxIterations) {
-            logger.debug("Current iteration: "+learner.getIterationCount()+ "...");
-            learner.next();
-
-            Policy policy = learner.getPolicy();
-            Result result = tester.testPolicy(policy);
-            if (!tester.atIterationLimit((int)result.getMean()*2) && iterationLimit == null) {
-                iterationLimit = learner.getIterationCount();
-            }
-            means.add(result.getMean());
-            iterations.add(learner.getIterationCount());
-            confidence.add(result.getConfidence());
-            results.add(tester.testPolicy(policy));
-        }
-        logger.info("Finished "+learner+ " "+tester+ "...");
-        logger.info("Making Graph!");
         try {
-            makeChart(learner + " on " + tester.getRacetrack() + " using " + tester.collisionModel(), iterations, means, confidence, iterationLimit);
+	    PrintWriter out = new PrintWriter(new File("results/"+title+".csv"));	
+	    while (!learner.finished() && learner.getIterationCount() <= maxIterations) {
+		logger.debug("Current iteration: "+learner.getIterationCount()+ "...");
+
+		learner.next();
+
+		Policy policy = learner.getPolicy();
+		Result result = tester.testPolicy(policy);
+		if (!tester.atIterationLimit((int)result.getMean()*2) && iterationLimit == null) {
+		    iterationLimit = learner.getIterationCount();
+		}
+
+		logger.debug("Current performance: "+ result.getMean());
+		
+		out.println(String.join(",", ""+learner.getIterationCount(),
+					""+result.getMean(),
+					""+(result.getMean() - result.getConfidence()),
+					""+(result.getMean() + result.getConfidence())));
+	    }
+	    logger.info("Finished "+learner+ " "+tester+ "...");
+	    out.close();
+
+            //makeChart(title, iterations, means, confidence, iterationLimit);
+	    //saveData(title, iterations, means, confidence);
         } catch (IOException ex) {
             logger.error("Could not save chart", ex);
         }
