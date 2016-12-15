@@ -18,9 +18,6 @@ build/
 .idea/
 *.iml
 
-# Results
-results/
-
 # Emacs
 *~
 *#
