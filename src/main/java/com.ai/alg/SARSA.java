@@ -127,20 +127,37 @@ public class SARSA extends RacetrackLearner {
             }
 	} while (curState != null && count % 2 == 0);
 
-        for (int i = 0; i < states.size(); i++) {
-            State state = states.get(i);
-            Action action = actions.get(i);
-            double nextStateActionUtility = curState == null ? 0 : -1000.0;
+	if (curState == null) {
+	    for (int i = 0; i < states.size(); i++) {
+		State state = states.get(i);
+		Action action = actions.get(i);
+		double nextStateActionUtility = 0;
 
-            if (i < states.size() - 1) {
-                State nextState = states.get(i + 1);
-                Action nextAction = actions.get(i + 1);
-		if (!qTable.containsKey(nextState)) {
-		    qTable.put(nextState, randomActionMap());
+		if (i < states.size() - 1) {
+		    State nextState = states.get(i + 1);
+		    Action nextAction = actions.get(i + 1);
+		    if (!qTable.containsKey(nextState)) {
+			qTable.put(nextState, randomActionMap());
+		    }
+
+		    nextStateActionUtility = qTable.get(nextState).get(nextAction);
 		}
 
-                nextStateActionUtility = qTable.get(nextState).get(nextAction);
-            }
+		if (!qTable.containsKey(state)) {
+		    qTable.put(state, randomActionMap());
+		}
+
+
+		qTable.get(state).put(action, ((1.0 - LEARNING_RATE) * qTable.get(state).get(action) +
+					       LEARNING_RATE * (-1.0 + GAMMA * nextStateActionUtility)));
+		timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 1);
+
+	    }
+	    iterationCount += states.size();
+	} else {
+	    State state = states.get(states.size() - 1);
+	    Action action = actions.get(states.size() - 1);
+	    double nextStateActionUtility = -1000.0;
 
 	    if (!qTable.containsKey(state)) {
 		qTable.put(state, randomActionMap());
@@ -149,11 +166,9 @@ public class SARSA extends RacetrackLearner {
 
 	    qTable.get(state).put(action, ((1.0 - LEARNING_RATE) * qTable.get(state).get(action) +
 					   LEARNING_RATE * (-1.0 + GAMMA * nextStateActionUtility)));
-            timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 1);
-
-        }
-        iterationCount += states.size();
-
+	    timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 2);
+	    iterationCount++;
+	}
 
 	if (count % 10 == 0) {
 	    printSamplePolicy();
