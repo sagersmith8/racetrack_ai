@@ -42,7 +42,7 @@ public class SARSA extends RacetrackLearner {
         aSim = new MDPActionSimulator(new RacetrackMDP(racetrack, collisionModel));
         policy = new SARSAPolicy();
 
-        iterationLimit = racetrack.getWidth()*racetrack.getHeight()*121;
+        iterationLimit = racetrack.getWidth()*racetrack.getHeight()*10;
     }
 
     class SARSAPolicy implements Policy {
@@ -92,56 +92,74 @@ public class SARSA extends RacetrackLearner {
      */
     @Override
     public void next() {
-        int xPos, yPos, xVel, yVel;
-        Position curPos;
-        Velocity curVel;
-        State curState;
-        Action curAction;
-        List<Action> actions = new ArrayList<>();
-        List<State> states = new ArrayList<>();
-	do {
-	    //determine random starting location and velocity
+	int startIterations = iterationCount;
+	while (Math.abs(startIterations - iterationCount) < 25) {
+	    int xPos, yPos, xVel, yVel;
+	    Position curPos;
+	    Velocity curVel;
+	    State curState;
+	    Action curAction;
+	    List<Action> actions = new ArrayList<>();
+	    List<State> states = new ArrayList<>();
 	    do {
-		xPos = (int)(Math.random()*racetrack.getWidth());
-		yPos = (int)(Math.random()*racetrack.getHeight());
-		curPos = new Position(xPos, yPos);
-	    } while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
+		//determine random starting location and velocity
+		do {
+		    xPos = (int)(Math.random()*racetrack.getWidth());
+		    yPos = (int)(Math.random()*racetrack.getHeight());
+		    curPos = new Position(xPos, yPos);
+		} while(!racetrack.isSafe(curPos) || racetrack.finishLine().contains(curPos));
 
-	    xVel = (int)(Math.random()*12)-5;
-	    yVel = (int)(Math.random()*12)-5;
+		xVel = (int)(Math.random()*12)-5;
+		yVel = (int)(Math.random()*12)-5;
 
-            states.clear();
-            actions.clear();
+		states.clear();
+		actions.clear();
 
-            curVel = new Velocity(xVel, yVel);
-            curState = new State(curPos, curVel);
+		curVel = new Velocity(xVel, yVel);
+		curState = new State(curPos, curVel);
 
-            //while we have not crossed the finish or reached our iteration limit
-            for (int i = 0; curState != null && i<iterationLimit; i++) {
-                //get next action
-                curAction = policy.getAction(curState);
-                actions.add(curAction);
+		//while we have not crossed the finish or reached our iteration limit
+		for (int i = 0; curState != null && i<iterationLimit; i++) {
+		    //get next action
+		    curAction = policy.getAction(curState);
+		    actions.add(curAction);
 
-                states.add(curState);
-                curState = aSim.getNextState(curState, curAction);
-            }
-	} while (curState != null && count % 2 == 0);
+		    states.add(curState);
+		    curState = aSim.getNextState(curState, curAction);
+		}
+	    } while (curState != null && count % 2 == 0);
 
-	if (curState == null) {
-	    for (int i = 0; i < states.size(); i++) {
-		State state = states.get(i);
-		Action action = actions.get(i);
-		double nextStateActionUtility = 0;
+	    if (curState == null) {
+		for (int i = 0; i < states.size(); i++) {
+		    State state = states.get(i);
+		    Action action = actions.get(i);
+		    double nextStateActionUtility = 0;
 
-		if (i < states.size() - 1) {
-		    State nextState = states.get(i + 1);
-		    Action nextAction = actions.get(i + 1);
-		    if (!qTable.containsKey(nextState)) {
-			qTable.put(nextState, randomActionMap());
+		    if (i < states.size() - 1) {
+			State nextState = states.get(i + 1);
+			Action nextAction = actions.get(i + 1);
+			if (!qTable.containsKey(nextState)) {
+			    qTable.put(nextState, randomActionMap());
+			}
+
+			nextStateActionUtility = qTable.get(nextState).get(nextAction);
 		    }
 
-		    nextStateActionUtility = qTable.get(nextState).get(nextAction);
+		    if (!qTable.containsKey(state)) {
+			qTable.put(state, randomActionMap());
+		    }
+
+
+		    qTable.get(state).put(action, ((1.0 - LEARNING_RATE) * qTable.get(state).get(action) +
+						   LEARNING_RATE * (-1.0 + GAMMA * nextStateActionUtility)));
+		    timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 1);
+
 		}
+		iterationCount += states.size();
+	    } else {
+		State state = states.get(states.size() - 1);
+		Action action = actions.get(states.size() - 1);
+		double nextStateActionUtility = -1000.0;
 
 		if (!qTable.containsKey(state)) {
 		    qTable.put(state, randomActionMap());
@@ -150,26 +168,10 @@ public class SARSA extends RacetrackLearner {
 
 		qTable.get(state).put(action, ((1.0 - LEARNING_RATE) * qTable.get(state).get(action) +
 					       LEARNING_RATE * (-1.0 + GAMMA * nextStateActionUtility)));
-		timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 1);
-
+		timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 2);
+		iterationCount++;
 	    }
-	    iterationCount += states.size();
-	} else {
-	    State state = states.get(states.size() - 1);
-	    Action action = actions.get(states.size() - 1);
-	    double nextStateActionUtility = -1000.0;
-
-	    if (!qTable.containsKey(state)) {
-		qTable.put(state, randomActionMap());
-	    }
-
-
-	    qTable.get(state).put(action, ((1.0 - LEARNING_RATE) * qTable.get(state).get(action) +
-					   LEARNING_RATE * (-1.0 + GAMMA * nextStateActionUtility)));
-	    timesVisited.put(state, timesVisited.getOrDefault(state, 0) + 2);
-	    iterationCount++;
 	}
-
 	if (count % 10 == 0) {
 	    printSamplePolicy();
 	    printSamplePolicy();

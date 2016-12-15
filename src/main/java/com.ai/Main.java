@@ -103,6 +103,7 @@ public class Main {
                 case "restart":
                     logger.debug("Setting restart collision model for policy testers");
                     collisionModels.add(Collision.RESTART);
+		    break;
                 default:
                     logger.error("Unrecognized value for model " + options.valueOf("model").toString() + "expected <restart> or <stop>");
                     logger.error("Throwing runtime exception...");

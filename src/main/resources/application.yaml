@@ -3,7 +3,7 @@ logging:
   pattern:
     file: "%msg%n"
   level:
-    ROOT: 'info'
+    ROOT: 'debug'
     jndi: 'warn'
     org.eclipse.jetty: 'warn'
     org.jose4j: 'warn'
