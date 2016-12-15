@@ -42,7 +42,7 @@ public class SARSA extends RacetrackLearner {
         aSim = new MDPActionSimulator(new RacetrackMDP(racetrack, collisionModel));
         policy = new SARSAPolicy();
 
-        iterationLimit = racetrack.getWidth()*racetrack.getHeight()*10;
+        iterationLimit = racetrack.getWidth()*racetrack.getHeight();
     }
 
     class SARSAPolicy implements Policy {

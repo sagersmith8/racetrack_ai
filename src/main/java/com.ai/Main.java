@@ -369,7 +369,7 @@ public class Main {
         List<Double> confidence = new ArrayList<>();
         List<Double> means = new ArrayList<>();
         Integer iterationLimit = null;
-	String title = learner.toString().toLowerCase().replaceAll(" ", "-") + "." + tester.getRacetrack() + "." + tester.collisionModel().toString().replaceAll(" ","-") + "." + new java.util.Date().toString().toLowerCase().replaceAll(" ", "-");	
+	String title = learner.toString().toLowerCase().replaceAll(" ", "-") + "." + tester.getRacetrack() + "." + tester.collisionModel().toString().replaceAll(" ","-") + "." + new java.util.Date().toString().toLowerCase().replaceAll(" ", "-").replaceAll(":", "-");	
         logger.info("Starting "+learner+ " "+tester+ "...");
         try {
 	    PrintWriter out = new PrintWriter(new File("results/"+title+".csv"));	
